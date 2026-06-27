@@ -1,1 +1,62 @@
-roboforge
+# RoboForge
+
+A modern robotics learning platform for students. Learn through guided projects, browse components, and get AI-powered help while you build.
+
+## Tech Stack
+
+- **Next.js 15** (App Router)
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Framer Motion**
+- **Lucide React**
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+```
+app/
+  layout.tsx          # Global layout, fonts, nav, footer
+  globals.css         # Design tokens & theme
+  page.tsx            # Homepage (placeholder)
+  projects/           # Guided robotics projects
+  projects/[slug]/    # Individual project pages
+  components/         # Component catalog
+  chatbot/            # AI assistant
+  about/              # About page
+
+components/
+  Navbar.tsx          # Main navigation
+  Footer.tsx          # Site footer
+  ui/
+    Container.tsx     # Reusable layout container
+    PageTransition.tsx
+
+lib/
+  animations.ts       # Framer Motion variants & utilities
+  utils.ts            # Shared helpers (cn, etc.)
+```
+
+## Design System
+
+- Warm white background (`#FAFAF8`)
+- IBM Plex Mono (headings) + Inter (body)
+- 20px border radius, 1px borders
+- Subtle paper texture overlay
+- Blue aura glow on interactive hover states
+
+## Scripts
+
+| Command       | Description              |
+|---------------|--------------------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build       |
+| `npm run start` | Start production server |
+| `npm run lint`  | Run ESLint             |

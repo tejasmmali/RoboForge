@@ -1,3 +1,5 @@
+A website with chatbot made for IBM Skills-build submission
+
 # RoboForge
 
 A modern robotics learning platform for students. Learn through guided projects, browse components, and get AI-powered help while you build.

@@ -25,6 +25,7 @@ type ChatSidebarProps = {
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
   onClearChats: () => void;
+  onDeleteConversation?: (id: string) => void;
   onCategorySelect: (category: QuickCategory) => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -38,6 +39,7 @@ function SidebarContent({
   onNewChat,
   onSelectConversation,
   onClearChats,
+  onDeleteConversation,
   onCategorySelect,
   onClose,
   collapsed,
@@ -112,7 +114,7 @@ function SidebarContent({
             <p className="px-2 py-2 font-heading text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
               Recent Chats
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1.5 px-1">
               {conversations.length > 0 ? (
                 conversations.map((conv) => (
                   <ConversationItem
@@ -123,10 +125,11 @@ function SidebarContent({
                       onSelectConversation(conv.id);
                       onClose?.();
                     }}
+                    onDelete={onDeleteConversation}
                   />
                 ))
               ) : (
-                <p className="px-3 py-4 text-[12px] text-muted-foreground">
+                <p className="rounded-[12px] border border-dashed border-border/80 px-3 py-5 text-center text-[12px] text-muted-foreground">
                   No conversations yet
                 </p>
               )}

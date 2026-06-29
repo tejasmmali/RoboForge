@@ -1,5 +1,6 @@
 "use client";
 
+import { CATALOG_STATS } from "@/lib/content/catalog-stats";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
@@ -13,8 +14,8 @@ import {
 } from "@/components/visuals/LabDecor";
 
 const stats = [
-  { value: "100+", label: "Projects" },
-  { value: "200+", label: "Components" },
+  { value: String(CATALOG_STATS.projectCount), label: "Projects" },
+  { value: String(CATALOG_STATS.componentCount), label: "Components" },
   { value: "AI", label: "Powered" },
   { value: "Beginner", label: "Friendly" },
 ] as const;

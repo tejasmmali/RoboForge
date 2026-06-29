@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Bookmark,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { ProjectProgress } from "@/components/project-detail/ProjectProgress";
+import { useToggleProjectBookmark } from "@/hooks/useBookmarks";
 import type { ProjectDetail } from "@/lib/project-details";
 import { sidebarNavItems } from "@/lib/project-details";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,12 @@ export function ProjectSidebar({
   activeSection,
   currentStep = 1,
 }: ProjectSidebarProps) {
-  const [saved, setSaved] = useState(false);
+  const { isSaved: saved, toggle: toggleBookmark } = useToggleProjectBookmark({
+    projectSlug: project.slug,
+    title: project.title,
+    difficulty: project.difficulty,
+    image: project.image,
+  });
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -74,7 +79,7 @@ export function ProjectSidebar({
             type="button"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => setSaved((s) => !s)}
+            onClick={toggleBookmark}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-default border py-2 text-[12px] font-medium transition-colors",
               saved

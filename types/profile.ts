@@ -5,6 +5,10 @@ export type SocialLinks = {
   linkedin?: string;
   website?: string;
   twitter?: string;
+  username?: string;
+  department?: string;
+  location?: string;
+  portfolio?: string;
 };
 
 export type UserProfile = {

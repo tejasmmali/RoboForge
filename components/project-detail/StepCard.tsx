@@ -16,7 +16,7 @@ type StepCardProps = {
 export function StepCard({ step, code, isLast }: StepCardProps) {
   return (
     <motion.article
-      id={step.number === 5 ? "code" : undefined}
+      id={code ? "code" : undefined}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -115,11 +115,11 @@ export function StepCard({ step, code, isLast }: StepCardProps) {
             </div>
           )}
 
-          {step.number === 5 && code && (
+          {code && (
             <div className="mt-6">
               <CodeBlock code={code} />
               <motion.a
-                href="/chatbot"
+                href="/ai-assistant"
                 whileHover={{ scale: 1.02 }}
                 className="mt-3 inline-flex text-[13px] font-medium text-accent"
               >

@@ -60,3 +60,9 @@ lib/
 | `npm run build` | Production build       |
 | `npm run start` | Start production server |
 | `npm run lint`  | Run ESLint             |
+
+## Contact
+
+- **Email:** [tejasmali@mail.com](mailto:tejasmali@mail.com)
+- **GitHub:** [github.com/tejasmmali/RoboForge](https://github.com/tejasmmali/RoboForge)
+- **LinkedIn:** [linkedin.com/in/tejasmmali](https://www.linkedin.com/in/tejasmmali/)

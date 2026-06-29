@@ -6,14 +6,24 @@ import type { WeeklyProgressPoint } from "@/types/dashboard";
 type WeeklyProgressProps = {
   data: WeeklyProgressPoint[];
   embedded?: boolean;
+  hasActivity?: boolean;
 };
 
-export function WeeklyProgress({ data, embedded }: WeeklyProgressProps) {
+export function WeeklyProgress({ data, embedded, hasActivity = false }: WeeklyProgressProps) {
   const maxHours = Math.max(...data.map((d) => d.hours), 1);
   const maxProjects = Math.max(...data.map((d) => d.projects), 1);
   const maxAi = Math.max(...data.map((d) => d.aiUsage), 1);
 
-  const chart = (
+  const emptyState = (
+    <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+      <p className="font-heading text-[13px] font-medium">No activity this week</p>
+      <p className="mt-1 max-w-xs text-[12px] text-muted">
+        Build a project or chat with AI to see your weekly progress here.
+      </p>
+    </div>
+  );
+
+  const chart = hasActivity ? (
     <>
       <div className="mb-6 flex flex-wrap gap-4 text-[11px]">
         <span className="flex items-center gap-2">
@@ -62,13 +72,9 @@ export function WeeklyProgress({ data, embedded }: WeeklyProgressProps) {
           </div>
         ))}
       </div>
-
-      {!embedded && (
-        <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          Placeholder chart — connect to Supabase for live data
-        </p>
-      )}
     </>
+  ) : (
+    emptyState
   );
 
   if (embedded) {

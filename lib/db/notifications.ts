@@ -20,7 +20,6 @@ function mapNotification(row: DbNotification): NotificationRecord {
     createdAt: row.created_at,
   };
 }
-
 export async function getNotifications(
   userId: string,
   filters: NotificationFilters = {},
@@ -33,7 +32,6 @@ export async function getNotifications(
     .order("created_at", { ascending: false });
 
   if (filters.unreadOnly) query = query.eq("read", false);
-  if (!filters.includeArchived) query = query.eq("archived", false);
 
   const pageSize = filters.pageSize ?? 50;
   const page = filters.page ?? 1;
@@ -62,7 +60,6 @@ export async function createNotification(
         message: input.message,
         type: input.type,
         read: false,
-        archived: false,
       })
       .select("*")
       .single(),
@@ -129,8 +126,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .from("notifications")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
-    .eq("read", false)
-    .eq("archived", false);
+    .eq("read", false);
 
   if (error) return 0;
   return count ?? 0;

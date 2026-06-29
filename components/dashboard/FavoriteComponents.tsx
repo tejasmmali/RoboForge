@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ExternalLink, HeartOff } from "lucide-react";
 import type { SavedComponent } from "@/types/dashboard";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
+import { useRemoveComponentBookmark } from "@/hooks/useBookmarks";
 
 type FavoriteComponentsProps = {
   components: SavedComponent[];
@@ -12,6 +13,8 @@ type FavoriteComponentsProps = {
 };
 
 export function FavoriteComponents({ components, embedded }: FavoriteComponentsProps) {
+  const removeBookmark = useRemoveComponentBookmark();
+
   const content =
     components.length === 0 ? (
       <DashboardEmptyState
@@ -58,7 +61,9 @@ export function FavoriteComponents({ components, embedded }: FavoriteComponentsP
                   </a>
                   <button
                     type="button"
-                    className="ml-auto flex items-center gap-1 text-[11px] text-muted transition-colors hover:text-foreground"
+                    onClick={() => removeBookmark.mutate(item.component_slug)}
+                    disabled={removeBookmark.isPending}
+                    className="ml-auto flex items-center gap-1 text-[11px] text-muted transition-colors hover:text-foreground disabled:opacity-50"
                     aria-label="Remove from favorites"
                   >
                     <HeartOff className="h-3.5 w-3.5" strokeWidth={1.75} />

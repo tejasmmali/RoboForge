@@ -211,6 +211,22 @@ export async function removeComponentBookmark(
   );
 }
 
+export async function isComponentBookmarked(
+  userId: string,
+  componentSlug: string,
+): Promise<boolean> {
+  const supabase = getBrowserDb();
+  const row = await executeOptionalQuery<Pick<DbSavedComponent, "id">>(() =>
+    supabase
+      .from("saved_components")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("component_slug", componentSlug)
+      .maybeSingle(),
+  );
+  return Boolean(row);
+}
+
 export function queueBookmarkSync(
   type: "save-project" | "remove-project" | "save-component" | "remove-component",
   payload: Record<string, unknown>,

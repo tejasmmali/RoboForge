@@ -13,9 +13,9 @@ import {
   Settings2,
   Zap,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { SafeImage } from "@/components/ui/SafeImage";
+import { useToggleProjectBookmark } from "@/hooks/useBookmarks";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { ProgressBadge } from "@/components/ProgressBadge";
 import type { Project, ProjectTechnology } from "@/lib/projects";
@@ -48,11 +48,18 @@ function isFullProject(
 export function ProjectCard(props: ProjectCardProps) {
   const { project, variant = isFullProject(props.project) ? "full" : "compact" } =
     props;
-  const [saved, setSaved] = useState(false);
 
   const imageUrl = isFullProject(project)
     ? project.image
     : getProjectImage(project.slug);
+
+  const bookmarkMeta = {
+    projectSlug: project.slug,
+    title: project.title,
+    difficulty: project.difficulty,
+    image: imageUrl,
+  };
+  const { isSaved: saved, toggle: toggleBookmark } = useToggleProjectBookmark(bookmarkMeta);
 
   if (variant === "compact") {
     const compact = project as ProjectCardData;
@@ -60,17 +67,16 @@ export function ProjectCard(props: ProjectCardProps) {
       <motion.article
         whileHover={{ y: -5 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="group hover-glow flex min-h-[480px] flex-col overflow-hidden rounded-default border border-border bg-surface shadow-soft"
+        className="group hover-glow flex h-full min-h-[480px] flex-col overflow-hidden rounded-default border border-border bg-surface shadow-soft"
       >
-        <div className="relative min-h-0 flex-[7] overflow-hidden">
-          <Image
+        <div className="relative aspect-[5/4] shrink-0 overflow-hidden border-b border-border/60 bg-gradient-to-b from-muted/10 to-muted/30">
+          <SafeImage
             src={imageUrl}
             alt={compact.title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 400px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
           <DifficultyBadge
             difficulty={compact.difficulty as Project["difficulty"]}
             className="absolute left-4 top-4"
@@ -113,30 +119,29 @@ export function ProjectCard(props: ProjectCardProps) {
     <motion.article
       whileHover={{ y: -6 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group hover-glow flex flex-col overflow-hidden rounded-default border border-border bg-surface shadow-soft"
+      className="group hover-glow flex h-full min-h-[520px] flex-col overflow-hidden rounded-default border border-border bg-surface shadow-soft"
     >
-      <div className="relative aspect-video overflow-hidden">
-        <Image
+      <div className="relative aspect-[5/4] shrink-0 overflow-hidden border-b border-border/60 bg-gradient-to-b from-muted/10 to-muted/30">
+        <SafeImage
           src={full.image}
           alt={full.title}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+          className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.03]"
           sizes="(max-width: 768px) 100vw, 400px"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/25 via-transparent to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <DifficultyBadge difficulty={full.difficulty} />
-          <span className="rounded-[8px] border border-white/60 bg-white/80 px-2.5 py-1 font-heading text-[10px] font-medium uppercase tracking-wider text-foreground backdrop-blur-md">
+          <span className="rounded-[8px] border border-border/80 bg-surface/90 px-2.5 py-1 font-heading text-[10px] font-medium uppercase tracking-wider text-foreground backdrop-blur-md">
             {full.category}
           </span>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5 md:p-6">
-        <h3 className="font-heading text-[16px] font-medium tracking-tight">
+      <div className="flex min-h-0 flex-1 flex-col p-5 md:p-6">
+        <h3 className="line-clamp-2 min-h-[2.5rem] font-heading text-[16px] font-medium leading-snug tracking-tight">
           {full.title}
         </h3>
-        <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted">
+        <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-[13px] leading-relaxed text-muted">
           {full.description}
         </p>
 
@@ -172,7 +177,7 @@ export function ProjectCard(props: ProjectCardProps) {
 
         <ProgressBadge value={full.complexity} className="mt-4" />
 
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-auto flex items-center gap-2 pt-5">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
             <Link
               href={`/projects/${full.slug}`}
@@ -186,7 +191,7 @@ export function ProjectCard(props: ProjectCardProps) {
             type="button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSaved((s) => !s)}
+            onClick={toggleBookmark}
             aria-label={saved ? "Remove from saved" : "Save project"}
             aria-pressed={saved}
             className={cn(

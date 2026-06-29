@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, RotateCcw, Trash2 } from "lucide-react";
 import { ChatSidebar } from "@/components/chat/ChatSidebar";
+import { ConversationSearch } from "@/components/chat/ConversationSearch";
 import type { ChatSettings, QuickCategory } from "@/types/chat";
 import type { Conversation } from "@/types/message";
 
@@ -140,12 +141,22 @@ export function ConversationSidebar({
   onExportChat,
   onResetConversation,
   onClearChats,
+  onDeleteConversation,
   ...sidebarProps
 }: ConversationSidebarProps) {
   return (
     <div className="relative flex h-full flex-col">
+      {!sidebarProps.collapsed && (
+        <div className="hidden border-b border-border p-3 lg:block">
+          <ConversationSearch />
+        </div>
+      )}
       <div className="min-h-0 flex-1">
-        <ChatSidebar {...sidebarProps} onClearChats={onClearChats} />
+        <ChatSidebar
+          {...sidebarProps}
+          onClearChats={onClearChats}
+          onDeleteConversation={onDeleteConversation}
+        />
       </div>
       {!sidebarProps.collapsed && (
         <SettingsPanel

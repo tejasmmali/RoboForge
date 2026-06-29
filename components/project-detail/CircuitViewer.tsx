@@ -14,12 +14,12 @@ export function CircuitViewer({ circuit }: CircuitViewerProps) {
   return (
     <div className="space-y-6">
       <div className="group relative overflow-hidden rounded-default border border-border bg-surface shadow-soft">
-        <div className="relative aspect-[16/10] w-full">
+        <div className="relative aspect-[16/10] w-full bg-gradient-to-b from-muted/10 to-muted/25">
           <Image
             src={circuit.image}
             alt="Circuit diagram preview"
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            className="object-contain p-4 transition-transform duration-700 group-hover:scale-[1.02]"
             sizes="(max-width: 768px) 100vw, 800px"
           />
           <div className="absolute inset-0 bg-foreground/[0.04]" />

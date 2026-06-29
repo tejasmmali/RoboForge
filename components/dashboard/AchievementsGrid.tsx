@@ -27,6 +27,27 @@ type AchievementsGridProps = {
 };
 
 export function AchievementsGrid({ achievements, embedded }: AchievementsGridProps) {
+  if (achievements.length === 0) {
+    const empty = (
+      <div className="rounded-default border border-dashed border-border bg-surface/50 px-6 py-10 text-center">
+        <p className="font-heading text-[14px] font-medium">No achievements yet</p>
+        <p className="mt-1 text-[12px] text-muted">
+          Complete projects and use the AI assistant to unlock badges.
+        </p>
+      </div>
+    );
+    if (embedded) return empty;
+    return (
+      <section id="achievements" className="scroll-mt-24">
+        <div className="mb-5">
+          <h2 className="font-heading text-lg font-medium tracking-tight">Achievements</h2>
+          <p className="mt-0.5 text-[13px] text-muted">Badges earned on your journey</p>
+        </div>
+        {empty}
+      </section>
+    );
+  }
+
   const grid = (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
         {achievements.map((badge, i) => {

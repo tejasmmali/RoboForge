@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { BlueprintGrid, TechLabel } from "@/components/visuals/LabDecor";
+import { CATALOG_STATS } from "@/lib/content/catalog-stats";
 import type { FilterChip, SortOption } from "@/lib/projects";
 import {
   featuredProjectSlug,
@@ -25,7 +26,7 @@ import {
 } from "@/lib/projects";
 
 const heroStats = [
-  { value: "120+", label: "Projects" },
+  { value: String(CATALOG_STATS.projectCount), label: "Projects" },
   { value: "4", label: "Difficulty Levels" },
   { value: "AI", label: "Guided" },
   { value: "Open", label: "Source" },
@@ -91,9 +92,13 @@ export function ProjectsPageContent() {
       <section className="py-12 md:py-16">
         <Container>
           {filtered.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((project, index) => (
-                <ScrollReveal key={project.slug} delay={index * 0.04}>
+                <ScrollReveal
+                  key={project.slug}
+                  delay={index * 0.04}
+                  className="h-full"
+                >
                   <ProjectCard project={project} variant="full" />
                 </ScrollReveal>
               ))}

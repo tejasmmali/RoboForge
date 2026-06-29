@@ -68,7 +68,7 @@ export function SignupForm() {
       <AuthInput
         label="Full Name"
         autoComplete="name"
-        placeholder="Alex Chen"
+        placeholder="Your full name"
         error={errors.fullName?.message}
         {...register("fullName")}
       />

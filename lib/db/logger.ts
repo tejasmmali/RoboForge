@@ -36,6 +36,12 @@ export const logger = {
     emit("error", message, { scope: "api", meta }),
   auth: (message: string, meta?: Record<string, unknown>) =>
     emit("warn", message, { scope: "auth", meta }),
-  db: (message: string, meta?: Record<string, unknown>) =>
-    emit("error", message, { scope: "database", meta }),
+  db: (message: string, meta?: Record<string, unknown>) => {
+    const code = (meta?.error as { code?: string })?.code;
+    const isMissing =
+      code === "PGRST205" ||
+      code === "42P01" ||
+      message.includes("may not exist");
+    emit(isMissing ? "warn" : "error", message, { scope: "database", meta });
+  },
 };

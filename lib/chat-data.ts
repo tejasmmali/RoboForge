@@ -5,83 +5,6 @@ import type {
   QuickCategory,
   SuggestedPrompt,
 } from "@/types/chat";
-import type { Conversation } from "@/types/message";
-
-export const HC_SR04_RESPONSE = `## HC-SR04 Returning 0 cm — Troubleshooting
-
-When your ultrasonic sensor always reads **0 cm**, it usually indicates a wiring, timing, or power issue rather than a faulty sensor.
-
-### Possible Causes
-
-1. **Trig and Echo pins swapped** — the most common mistake
-2. **Insufficient power** — HC-SR04 needs stable 5V; weak USB power causes erratic readings
-3. **Echo pin not receiving the pulse** — loose jumper wire or wrong GPIO
-4. **Object too close** — minimum range is ~2 cm; closer objects return 0
-5. **Timeout in \`pulseIn()\`** — no echo received within the timeout window
-
-### Pin Wiring
-
-| HC-SR04 | Arduino UNO |
-|---------|-------------|
-| VCC     | 5V          |
-| Trig    | Pin 9       |
-| Echo    | Pin 10      |
-| GND     | GND         |
-
-> **Note:** Echo outputs 5V logic. For ESP32 (3.3V), use a voltage divider on the Echo pin.
-
-### Example Arduino Code
-
-\`\`\`cpp
-const int trigPin = 9;
-const int echoPin = 10;
-
-void setup() {
-  Serial.begin(9600);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
-
-void loop() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH, 30000);
-  float distance = duration * 0.034 / 2;
-
-  if (duration == 0) {
-    Serial.println("Error: No echo received");
-  } else {
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.println(" cm");
-  }
-  delay(500);
-}
-\`\`\`
-
-### Testing Checklist
-
-- [ ] Verify Trig → Pin 9, Echo → Pin 10
-- [ ] Confirm 5V power (not 3.3V on UNO)
-- [ ] Point sensor at an object **> 2 cm** away
-- [ ] Check Serial Monitor baud rate is **9600**
-- [ ] Test with \`Serial.println(duration)\` before calculating distance
-
-### Common Mistakes
-
-- Using \`delay()\` instead of \`delayMicroseconds()\` for the trigger pulse
-- Forgetting \`pinMode(echoPin, INPUT)\`
-- Connecting Echo to an analog-only pin without digital read support
-
-### Reference Links
-
-- [HC-SR04 Datasheet](#) *(placeholder)*
-- [Obstacle Avoiding Robot Guide](/projects/obstacle-avoiding-robot)
-- [Ultrasonic Sensor Tutorial](#) *(placeholder)*`;
 
 export const suggestedPrompts: SuggestedPrompt[] = [
   { id: "pwm", label: "Explain PWM", prompt: "Explain how PWM works for motor speed control on Arduino.", category: "arduino" },
@@ -118,10 +41,9 @@ export const quickCategories: { id: QuickCategory; label: string }[] = [
 ];
 
 export const pinnedResources: PinnedResource[] = [
-  { id: "datasheets", label: "Datasheets", href: "#" },
-  { id: "circuits", label: "Circuit Examples", href: "#" },
-  { id: "snippets", label: "Code Snippets", href: "#" },
   { id: "guides", label: "Project Guides", href: "/projects" },
+  { id: "components", label: "Components Library", href: "/components" },
+  { id: "datasheets", label: "Resources", href: "/projects" },
 ];
 
 export const aiFeatures: AIFeature[] = [
@@ -146,107 +68,112 @@ export const capabilities: Capability[] = [
   { id: "troubleshoot", title: "Troubleshooting", description: "Fix motors, sensors, compile errors, and power issues.", icon: "troubleshoot" },
 ];
 
-export const demoConversations: Conversation[] = [
+export type PromptLibraryCategory = {
+  id: string;
+  label: string;
+  prompts: { id: string; label: string; prompt: string }[];
+};
+
+export const promptLibrary: PromptLibraryCategory[] = [
   {
-    id: "conv-1",
-    title: "HC-SR04 Problem",
-    preview: "My HC-SR04 always returns 0 cm...",
-    updatedAt: "2024-06-20T14:30:00Z",
-    pinned: true,
-    category: "sensors",
-    messages: [
-      {
-        id: "msg-1",
-        role: "user",
-        content: "My HC-SR04 always returns 0 cm.",
-        createdAt: "2024-06-20T14:28:00Z",
-      },
-      {
-        id: "msg-2",
-        role: "assistant",
-        content: HC_SR04_RESPONSE,
-        createdAt: "2024-06-20T14:30:00Z",
-      },
+    id: "arduino",
+    label: "Arduino",
+    prompts: [
+      { id: "a1", label: "Blink basics", prompt: "Explain Arduino blink sketch line by line for a beginner." },
+      { id: "a2", label: "Analog read", prompt: "How do I read analog sensors with Arduino analog pins?" },
+      { id: "a3", label: "Serial debug", prompt: "Show me Serial debugging best practices for Arduino." },
     ],
   },
   {
-    id: "conv-2",
-    title: "Arduino Basics",
-    preview: "What is the difference between digital and analog pins?",
-    updatedAt: "2024-06-19T10:15:00Z",
-    category: "arduino",
-    messages: [],
+    id: "esp32",
+    label: "ESP32",
+    prompts: [
+      { id: "e1", label: "WiFi connect", prompt: "How do I connect ESP32 to WiFi and handle reconnects?" },
+      { id: "e2", label: "MQTT publish", prompt: "Generate ESP32 code to publish sensor data over MQTT." },
+      { id: "e3", label: "Deep sleep", prompt: "Explain ESP32 deep sleep for battery-powered IoT nodes." },
+    ],
   },
   {
-    id: "conv-3",
-    title: "Motor Not Working",
-    preview: "My DC motor doesn't spin when connected to L298N...",
-    updatedAt: "2024-06-18T16:45:00Z",
-    category: "motors",
-    messages: [],
+    id: "iot",
+    label: "IoT",
+    prompts: [
+      { id: "i1", label: "Weather station", prompt: "Help me plan an IoT weather station architecture." },
+      { id: "i2", label: "Cloud dashboard", prompt: "What is the simplest way to send ESP32 data to a cloud dashboard?" },
+      { id: "i3", label: "Security basics", prompt: "IoT security basics for hobby robotics projects." },
+    ],
   },
   {
-    id: "conv-4",
-    title: "ESP32 WiFi Setup",
-    preview: "How to connect ESP32 to home WiFi network?",
-    updatedAt: "2024-06-17T09:20:00Z",
-    category: "esp32",
-    messages: [],
+    id: "motors",
+    label: "Motors",
+    prompts: [
+      { id: "m1", label: "L298N wiring", prompt: "How do I wire L298N to Arduino for two DC motors?" },
+      { id: "m2", label: "Servo control", prompt: "Explain servo PWM control and fix jitter issues." },
+      { id: "m3", label: "Motor selection", prompt: "How do I choose motors for a small 2WD robot?" },
+    ],
   },
   {
-    id: "conv-5",
-    title: "Bluetooth Robot",
-    preview: "Help me build an Android-controlled car...",
-    updatedAt: "2024-06-16T11:00:00Z",
-    category: "iot",
-    messages: [],
+    id: "sensors",
+    label: "Sensors",
+    prompts: [
+      { id: "s1", label: "HC-SR04", prompt: "Explain HC-SR04 wiring and sample Arduino code." },
+      { id: "s2", label: "IR vs ultrasonic", prompt: "Compare IR obstacle sensors vs HC-SR04 for robotics." },
+      { id: "s3", label: "IMU basics", prompt: "Introduce IMU sensors for balancing robots." },
+    ],
   },
   {
-    id: "conv-6",
-    title: "Robotic Arm",
-    preview: "How many servos do I need for a 4-DOF arm?",
-    updatedAt: "2024-06-15T13:30:00Z",
-    category: "motors",
-    messages: [],
+    id: "computer-vision",
+    label: "Computer Vision",
+    prompts: [
+      { id: "cv1", label: "OpenCV intro", prompt: "Introduce OpenCV for a beginner robotics project." },
+      { id: "cv2", label: "Line detection", prompt: "How does line detection work for robot navigation?" },
+      { id: "cv3", label: "Camera module", prompt: "Compare camera modules for Raspberry Pi robotics." },
+    ],
   },
   {
-    id: "conv-7",
-    title: "Smart Dustbin",
-    preview: "Ultrasonic sensor for automatic lid opening...",
-    updatedAt: "2024-06-14T08:50:00Z",
-    category: "sensors",
-    messages: [],
+    id: "electronics",
+    label: "Electronics",
+    prompts: [
+      { id: "el1", label: "Resistor color code", prompt: "Explain resistor color codes with examples." },
+      { id: "el2", label: "Breadboard wiring", prompt: "Best practices for clean breadboard wiring." },
+      { id: "el3", label: "Voltage dividers", prompt: "When and how to use voltage dividers with microcontrollers?" },
+    ],
+  },
+  {
+    id: "automation",
+    label: "Automation",
+    prompts: [
+      { id: "au1", label: "Relay control", prompt: "How do I control a relay safely with Arduino?" },
+      { id: "au2", label: "Home automation", prompt: "Plan a simple home automation demo with ESP32." },
+      { id: "au3", label: "Scheduling tasks", prompt: "Explain task scheduling patterns for embedded automation." },
+    ],
+  },
+  {
+    id: "debugging",
+    label: "Debugging",
+    prompts: [
+      { id: "d1", label: "Compile errors", prompt: "Help me interpret common Arduino compile errors." },
+      { id: "d2", label: "Sensor noise", prompt: "My sensor readings are noisy — how do I debug this?" },
+      { id: "d3", label: "Motor not spinning", prompt: "My motor doesn't spin — walk me through troubleshooting." },
+    ],
+  },
+  {
+    id: "programming",
+    label: "Programming",
+    prompts: [
+      { id: "p1", label: "State machines", prompt: "Explain state machines for robot behavior with an example." },
+      { id: "p2", label: "PID intro", prompt: "Explain PID control for line following in simple terms." },
+      { id: "p3", label: "Interrupts", prompt: "Explain Arduino interrupts with a practical example." },
+    ],
   },
 ];
 
-export const MOCK_ASSISTANT_REPLY =
-  "I'm RoboForge AI — Gemini integration is coming soon. For now, explore the demo conversation about HC-SR04, or browse our [projects](/projects) and [components](/components) library.";
-
-export const HC_SR04_DEMO_CODE = `const int trigPin = 9;
-const int echoPin = 10;
-
-void setup() {
-  Serial.begin(9600);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
-
-void loop() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH, 30000);
-  float distance = duration * 0.034 / 2;
-
-  if (duration == 0) {
-    Serial.println("Error: No echo received");
-  } else {
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.println(" cm");
-  }
-  delay(500);
-}`;
+export const toolActionPrompts: Record<string, string> = {
+  code: "Generate Arduino or ESP32 code for my current robotics task. Use my project context and ask clarifying questions if hardware is unclear.",
+  circuit: "Explain the circuit wiring for my current step. Include pin connections and common mistakes.",
+  sensors: "Recommend compatible sensors for my current board and project goals.",
+  compare: "Compare relevant components for my project with a concise pros/cons table.",
+  power: "Calculate power requirements and suggest a battery setup for my robot.",
+  motor: "Recommend motors and drivers suitable for my current build.",
+  planner: "Create a phased project plan with milestones, parts list, and estimated difficulty.",
+  debug: "Help me debug wiring or code issues for my current robotics step.",
+};

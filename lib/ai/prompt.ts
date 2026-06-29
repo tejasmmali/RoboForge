@@ -1,6 +1,7 @@
 import {
   formatMemoryContextBlock,
   formatProjectContextBlock,
+  formatRouteContextBlock,
 } from "@/lib/ai/context";
 import {
   BASE_SYSTEM_PROMPT,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/ai/systemPrompt";
 import type { ProjectChatContext } from "@/types/project";
 import type { ChatMemoryContext } from "@/types/project";
+import type { GlobalRouteContext } from "@/types/chat";
 
 const INJECTION_PATTERNS = [
   /ignore (all )?(previous|prior|above) instructions/i,
@@ -32,6 +34,7 @@ export function detectPromptInjection(input: string): boolean {
 export function buildSystemInstruction(options?: {
   projectContext?: ProjectChatContext;
   memoryContext?: ChatMemoryContext;
+  routeContext?: GlobalRouteContext;
   responseLength?: ResponseLength;
   temperature?: number;
 }): string {
@@ -42,6 +45,10 @@ export function buildSystemInstruction(options?: {
       "",
       `Creativity level (temperature reference): ${options.temperature.toFixed(1)} — stay accurate for wiring and code.`,
     );
+  }
+
+  if (options?.routeContext) {
+    parts.push("", formatRouteContextBlock(options.routeContext));
   }
 
   if (options?.projectContext) {

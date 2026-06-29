@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Bookmark,
@@ -11,9 +10,10 @@ import {
   Package,
   Play,
 } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { Button } from "@/components/ui/Button";
+import { useToggleProjectBookmark } from "@/hooks/useBookmarks";
 import type { ProjectDetail } from "@/lib/project-details";
 import { BlueprintGrid, TechLabel } from "@/components/visuals/LabDecor";
 import { cn } from "@/lib/utils";
@@ -24,17 +24,22 @@ type ProjectHeroProps = {
 };
 
 export function ProjectHero({ project, onStartBuilding }: ProjectHeroProps) {
-  const [saved, setSaved] = useState(false);
+  const { isSaved: saved, toggle: toggleBookmark } = useToggleProjectBookmark({
+    projectSlug: project.slug,
+    title: project.title,
+    difficulty: project.difficulty,
+    image: project.image,
+  });
 
   return (
     <section className="relative overflow-hidden border-b border-border">
-      <div className="relative aspect-[21/9] min-h-[280px] w-full md:min-h-[360px]">
-        <Image
+      <div className="relative aspect-[21/9] min-h-[280px] w-full bg-gradient-to-b from-muted/15 to-muted/35 md:min-h-[360px]">
+        <SafeImage
           src={project.image}
           alt={project.title}
           fill
           priority
-          className="object-cover"
+          className="object-contain p-6 md:p-10"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
@@ -115,7 +120,7 @@ export function ProjectHero({ project, onStartBuilding }: ProjectHeroProps) {
                 type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSaved((s) => !s)}
+                onClick={toggleBookmark}
                 aria-label={saved ? "Remove bookmark" : "Bookmark project"}
                 aria-pressed={saved}
                 className={cn(

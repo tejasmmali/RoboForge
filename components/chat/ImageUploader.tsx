@@ -13,6 +13,7 @@ type ImageUploaderProps = {
   images: MessageImage[];
   onChange: (images: MessageImage[]) => void;
   disabled?: boolean;
+  showPreviews?: boolean;
   className?: string;
 };
 
@@ -24,6 +25,7 @@ export function ImageUploader({
   images,
   onChange,
   disabled,
+  showPreviews = true,
   className,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,8 +57,8 @@ export function ImageUploader({
   };
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      {images.length > 0 && (
+    <div className={cn(showPreviews && "flex flex-col gap-2", className)}>
+      {showPreviews && images.length > 0 && (
         <div className="flex flex-wrap gap-2 px-1">
           {images.map((image) => (
             <div
@@ -101,7 +103,7 @@ export function ImageUploader({
         disabled={disabled}
         onClick={() => inputRef.current?.click()}
         title="Upload circuit or wiring photo (vision analysis coming soon)"
-        className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-background hover:text-foreground disabled:opacity-40"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-40"
       >
         <ImagePlus className="h-4 w-4" strokeWidth={1.75} />
       </motion.button>

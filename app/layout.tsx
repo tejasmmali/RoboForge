@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { GlobalChatShell } from "@/components/chat/GlobalChatShell";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
@@ -35,8 +37,8 @@ export const metadata: Metadata = {
     "electronics",
     "STEM",
   ],
-  authors: [{ name: "RoboForge" }],
-  creator: "RoboForge",
+  authors: [{ name: "Tejas Mali", url: "https://github.com/tejasmmali/RoboForge" }],
+  creator: "Tejas Mali",
 };
 
 export const viewport: Viewport = {
@@ -67,15 +69,19 @@ export default function RootLayout({
 
         <AuthProvider>
           <QueryProvider>
-            <div className="flex min-h-dvh flex-col">
-              <Navbar />
-              <PageTransition>
-                <main id="main-content" className="flex-1">
-                  {children}
-                </main>
-              </PageTransition>
-              <Footer />
-            </div>
+            <Suspense fallback={null}>
+              <GlobalChatShell>
+                <div className="flex min-h-dvh flex-col">
+                  <Navbar />
+                  <PageTransition>
+                    <main id="main-content" className="flex-1">
+                      {children}
+                    </main>
+                  </PageTransition>
+                  <Footer />
+                </div>
+              </GlobalChatShell>
+            </Suspense>
           </QueryProvider>
         </AuthProvider>
       </body>

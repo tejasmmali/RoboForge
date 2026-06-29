@@ -27,7 +27,7 @@ function mapConversation(
     updatedAt: row.updated_at,
     createdAt: row.created_at,
     pinned: row.pinned,
-    archived: row.archived ?? false,
+    archived: "archived" in row ? Boolean(row.archived) : false,
     category: row.category ?? undefined,
     projectSlug: row.project_slug ?? undefined,
     userId: row.user_id,
@@ -57,16 +57,12 @@ export async function listConversations(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabase
+  const query = supabase
     .from("chat_conversations")
     .select("*")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
     .range(from, to);
-
-  if (!params.includeArchived) {
-    query = query.eq("archived", false);
-  }
 
   const { data, error } = await query;
   if (error) throw error;
@@ -123,7 +119,6 @@ export async function createConversation(
         project_slug: parsed.projectSlug ?? null,
         category: parsed.category ?? null,
         pinned: false,
-        archived: false,
       })
       .select("*")
       .single(),
@@ -271,7 +266,10 @@ export async function getUserMemoryContext(userId: string) {
   return {
     favoriteComponents: (data?.favorite_components as string[]) ?? [],
     recentProjects: (data?.recent_projects as string[]) ?? [],
-    learningProgress: (data?.learning_progress as string) ?? null,
+    learningProgress:
+      typeof data?.learning_progress === "string"
+        ? data.learning_progress
+        : undefined,
   };
 }
 

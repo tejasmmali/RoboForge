@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AchievementsGrid } from "@/components/dashboard/AchievementsGrid";
@@ -11,6 +12,7 @@ import { DashboardDownloads } from "@/components/dashboard/DashboardDownloads";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import {
   getDashboardNavItem,
+  dashboardNavItems,
   type DashboardSection,
 } from "@/components/dashboard/dashboard-nav";
 import { FavoriteComponents } from "@/components/dashboard/FavoriteComponents";
@@ -34,9 +36,24 @@ function DashboardSkeleton() {
   );
 }
 
+function parseDashboardSection(value: string | null): DashboardSection {
+  const valid = dashboardNavItems.map((item) => item.id);
+  if (value && valid.includes(value as DashboardSection)) {
+    return value as DashboardSection;
+  }
+  return "overview";
+}
+
 function DashboardContent() {
-  const { user, profile, authLoading, displayName, data } = useDashboard();
-  const [section, setSection] = useState<DashboardSection>("overview");
+  const { user, profile, authLoading, displayName, data, isNewUser } = useDashboard();
+  const searchParams = useSearchParams();
+  const [section, setSection] = useState<DashboardSection>(() =>
+    parseDashboardSection(searchParams.get("section")),
+  );
+
+  useEffect(() => {
+    setSection(parseDashboardSection(searchParams.get("section")));
+  }, [searchParams]);
 
   if (authLoading || !user) {
     return <DashboardSkeleton />;
@@ -51,7 +68,7 @@ function DashboardContent() {
       case "overview":
         return (
           <DashboardBoard key={section}>
-            <OverviewPanel name={displayName} data={data} />
+            <OverviewPanel name={displayName} data={data} isNewUser={isNewUser} />
           </DashboardBoard>
         );
       case "continue":

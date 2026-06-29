@@ -5,11 +5,14 @@ import {
   sendToGemini,
   streamFromGemini,
 } from "@/lib/ai/gemini";
+import { quotaErrorMessage } from "@/lib/ai/chat-limits";
 import {
   buildSystemInstruction,
   detectPromptInjection,
   sanitizeUserInput,
 } from "@/lib/ai/prompt";
+import { consumeChatQuota, consumeChatQuotaForGuest, applyGuestUsageCookie } from "@/lib/db/ai-usage.server";
+import { createClient } from "@/lib/supabase/server";
 import type { ChatApiRequest, ChatStreamEvent } from "@/types/chat";
 
 const messageSchema = z.object({
@@ -47,7 +50,20 @@ const requestSchema = z.object({
     .object({
       favoriteComponents: z.array(z.string()).optional(),
       recentProjects: z.array(z.string()).optional(),
-      learningProgress: z.string().optional(),
+      learningProgress: z.string().nullish(),
+    })
+    .optional(),
+  routeContext: z
+    .object({
+      pathname: z.string(),
+      pageLabel: z.string(),
+      assistantMode: z.string(),
+      isAuthenticated: z.boolean(),
+      theme: z.string(),
+      language: z.string(),
+      learningLevel: z.string().optional(),
+      codingStyle: z.string().optional(),
+      selectedComponent: z.string().nullable().optional(),
     })
     .optional(),
   settings: z
@@ -76,6 +92,41 @@ function sanitizeMessages(
       parts: [{ text }],
     };
   });
+}
+
+function quotaErrorResponse(quota: Awaited<ReturnType<typeof consumeChatQuota>>) {
+  return NextResponse.json(
+    {
+      error: {
+        code: "rate_limit",
+        message: quotaErrorMessage(quota),
+      },
+      quota,
+    },
+    { status: 429 },
+  );
+}
+
+async function enforceChatQuota() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const { result, cookieUpdate } = await consumeChatQuotaForGuest();
+    if (cookieUpdate) await applyGuestUsageCookie(cookieUpdate);
+    if (!result.allowed) {
+      return { quota: result, blocked: true as const };
+    }
+    return { quota: result, blocked: false as const };
+  }
+
+  const quota = await consumeChatQuota();
+  if (!quota.allowed) {
+    return { quota, blocked: true as const };
+  }
+  return { quota, blocked: false as const };
 }
 
 function createSseStream(body: ChatApiRequest) {
@@ -107,6 +158,7 @@ function createSseStream(body: ChatApiRequest) {
         const systemInstruction = buildSystemInstruction({
           projectContext: body.projectContext,
           memoryContext: body.memoryContext,
+          routeContext: body.routeContext,
           responseLength: body.settings?.responseLength,
           temperature: body.settings?.temperature,
         });
@@ -174,6 +226,34 @@ export async function POST(request: Request) {
       );
     }
 
+    const { blocked, quota } = await enforceChatQuota();
+    if (blocked) {
+      if (body.stream) {
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          start(controller) {
+            const event: ChatStreamEvent = {
+              type: "error",
+              error: { code: "rate_limit", message: quotaErrorMessage(quota) },
+            };
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(event)}\n\n`),
+            );
+            controller.close();
+          },
+        });
+        return new Response(stream, {
+          status: 429,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+          },
+        });
+      }
+      return quotaErrorResponse(quota);
+    }
+
     if (body.stream) {
       const stream = createSseStream(body);
       return new Response(stream, {
@@ -197,6 +277,7 @@ export async function POST(request: Request) {
     const systemInstruction = buildSystemInstruction({
       projectContext: body.projectContext,
       memoryContext: body.memoryContext,
+      routeContext: body.routeContext,
       responseLength: body.settings?.responseLength,
       temperature: body.settings?.temperature,
     });

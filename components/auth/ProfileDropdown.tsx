@@ -15,6 +15,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { AvatarImage } from "@/components/ui/AvatarImage";
 import { cn } from "@/lib/utils";
 
 export function ProfileDropdown() {
@@ -50,13 +51,6 @@ export function ProfileDropdown() {
     );
   }
 
-  const initials =
-    profile?.full_name?.charAt(0)?.toUpperCase() ??
-    user.email?.charAt(0)?.toUpperCase() ??
-    "U";
-
-  const avatarUrl = profile?.avatar_url ?? user.user_metadata?.avatar_url;
-
   const handleLogout = async () => {
     await signOut();
     setOpen(false);
@@ -67,10 +61,10 @@ export function ProfileDropdown() {
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/profile", label: "My Profile", icon: User },
-    { href: "/projects", label: "Saved Projects", icon: FolderOpen },
-    { href: "/ai-assistant", label: "AI Conversations", icon: Bot },
-    { href: "/components", label: "Bookmarked Components", icon: Bookmark },
-    { href: "/profile", label: "Settings", icon: Settings },
+    { href: "/dashboard?section=saved-projects", label: "Saved Projects", icon: FolderOpen },
+    { href: "/dashboard?section=ai-history", label: "AI Conversations", icon: Bot },
+    { href: "/dashboard?section=components", label: "Bookmarked Components", icon: Bookmark },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -84,18 +78,7 @@ export function ProfileDropdown() {
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt=""
-            className="h-7 w-7 rounded-full object-cover"
-          />
-        ) : (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background">
-            {initials}
-          </span>
-        )}
+        <AvatarImage user={user} profile={profile} size="sm" className="shadow-none" />
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 text-muted transition-transform duration-200",

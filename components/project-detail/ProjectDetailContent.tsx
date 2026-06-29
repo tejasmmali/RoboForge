@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Clock, Code, Cpu, IndianRupee, Package, Zap } from "lucide-react";
-import { AIAssistantPanel } from "@/components/project-detail/AIAssistantPanel";
+import { ProjectChatContextBridge } from "@/components/chat/ProjectChatContextBridge";
+import { buildProjectContextFromDetail } from "@/lib/ai/context";
 import { CircuitViewer } from "@/components/project-detail/CircuitViewer";
 import { DownloadsGrid } from "@/components/project-detail/DownloadsGrid";
 import { PartsTable } from "@/components/project-detail/PartsTable";
@@ -14,6 +15,8 @@ import { TroubleshootingAccordion } from "@/components/project-detail/Troublesho
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { useAuth } from "@/hooks/useAuth";
+import { useProjectProgress, useUpdateProgress } from "@/hooks/useProgress";
 import type { ProjectDetail } from "@/lib/project-details";
 import { sidebarNavItems } from "@/lib/project-details";
 type ProjectDetailContentProps = {
@@ -54,6 +57,26 @@ const infoIcons = {
 
 export function ProjectDetailContent({ project }: ProjectDetailContentProps) {
   const [activeSection, setActiveSection] = useState("overview");
+  const { user } = useAuth();
+  const { data: progressData } = useProjectProgress(project.slug);
+  const updateProgress = useUpdateProgress();
+
+  const currentStep = progressData?.currentStep ?? 1;
+  const progressPercent = progressData?.progress ?? Math.round((currentStep / project.totalSteps) * 100);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    updateProgress.mutate({ projectSlug: project.slug });
+  }, [project.slug, user?.id]);
+
+  const projectChatContext = useMemo(
+    () =>
+      buildProjectContextFromDetail(project, {
+        currentStepNumber: currentStep,
+        progressPercent,
+      }),
+    [project, currentStep, progressPercent],
+  );
 
   useEffect(() => {
     const ids = sidebarNavItems.map((item) => item.id);
@@ -163,7 +186,63 @@ export function ProjectDetailContent({ project }: ProjectDetailContentProps) {
                 </div>
               </ScrollReveal>
 
-              {/* Info cards */}
+              {/* Prerequisites & Safety */}
+              {(project.prerequisites.length > 0 || project.safety.length > 0) && (
+                <ScrollReveal delay={0.12}>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {project.prerequisites.length > 0 && (
+                      <div className="rounded-default border border-border bg-surface/60 p-5 backdrop-blur-sm">
+                        <h3 className="font-heading text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+                          Prerequisites
+                        </h3>
+                        <ul className="mt-3 space-y-2" role="list">
+                          {project.prerequisites.map((item) => (
+                            <li key={item} className="text-[13px] text-muted">
+                              · {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {project.safety.length > 0 && (
+                      <div className="rounded-default border border-amber-200/80 bg-amber-50/40 p-5 backdrop-blur-sm">
+                        <h3 className="font-heading text-[12px] font-medium uppercase tracking-wider text-amber-900/80">
+                          Safety Precautions
+                        </h3>
+                        <ul className="mt-3 space-y-2" role="list">
+                          {project.safety.map((item) => (
+                            <li key={item} className="text-[13px] text-amber-950/80">
+                              · {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </ScrollReveal>
+              )}
+
+              {/* Gallery */}
+              {project.gallery.length > 0 && (
+                <ScrollReveal delay={0.14}>
+                  <div className="grid grid-cols-3 gap-3">
+                    {project.gallery.map((src, i) => (
+                      <div
+                        key={src}
+                        className="relative aspect-[4/3] overflow-hidden rounded-[14px] border border-border bg-gradient-to-b from-muted/10 to-muted/25"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={`${project.title} gallery ${i + 1}`}
+                          className="h-full w-full object-contain p-2"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </ScrollReveal>
+              )}
+
               <ScrollReveal delay={0.15}>
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                   {infoCards.map((card) => {
@@ -229,7 +308,7 @@ export function ProjectDetailContent({ project }: ProjectDetailContentProps) {
                   <StepCard
                     key={step.number}
                     step={step}
-                    code={step.number === 5 ? project.code : undefined}
+                    code={step.number === project.codeStepNumber ? project.code : undefined}
                     isLast={index === project.steps.length - 1}
                   />
                 ))}
@@ -312,6 +391,36 @@ export function ProjectDetailContent({ project }: ProjectDetailContentProps) {
               <DownloadsGrid downloads={project.downloads} />
             </section>
 
+            {/* FAQ */}
+            {project.faq.length > 0 && (
+              <section id="faq" className="scroll-mt-28 mt-20 space-y-6">
+                <ScrollReveal>
+                  <SectionHeading
+                    id="faq-heading"
+                    title="Frequently Asked Questions"
+                    subtitle="Common questions about this build."
+                  />
+                </ScrollReveal>
+                <ScrollReveal delay={0.05}>
+                  <div className="space-y-3">
+                    {project.faq.map((item) => (
+                      <details
+                        key={item.question}
+                        className="group rounded-default border border-border bg-surface/60 backdrop-blur-sm"
+                      >
+                        <summary className="cursor-pointer px-5 py-4 text-[14px] font-medium marker:content-none">
+                          {item.question}
+                        </summary>
+                        <p className="border-t border-border px-5 py-4 text-[13px] leading-relaxed text-muted">
+                          {item.answer}
+                        </p>
+                      </details>
+                    ))}
+                  </div>
+                </ScrollReveal>
+              </section>
+            )}
+
             {/* Related */}
             <section id="related" className="scroll-mt-28 mt-20 space-y-6">
               <ScrollReveal>
@@ -353,13 +462,13 @@ export function ProjectDetailContent({ project }: ProjectDetailContentProps) {
             <ProjectSidebar
               project={project}
               activeSection={activeSection}
-              currentStep={2}
+              currentStep={currentStep}
             />
           </div>
         </div>
       </Container>
 
-      <AIAssistantPanel project={project} currentStepNumber={2} progressPercent={14} />
+      <ProjectChatContextBridge context={projectChatContext} />
     </>
   );
 }

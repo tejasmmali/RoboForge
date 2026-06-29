@@ -24,6 +24,7 @@ export function buildProjectContextFromDetail(
     progressPercent: options?.progressPercent,
     programming: project.programming,
     powerSource: project.powerSource,
+    aiPromptSuggestions: project.aiPromptSuggestions,
   };
 }
 
@@ -86,5 +87,38 @@ export function formatMemoryContextBlock(memory: ChatMemoryContext): string {
   }
 
   if (lines.length <= 2) return "";
+  return lines.join("\n");
+}
+
+export function formatRouteContextBlock(
+  route: import("@/types/chat").GlobalRouteContext,
+): string {
+  const lines: string[] = [
+    "## Current App Context",
+    "",
+    `Page: ${route.pageLabel} (${route.pathname})`,
+    `Assistant mode: ${route.assistantMode}`,
+    `Signed in: ${route.isAuthenticated ? "yes" : "no"}`,
+    `Theme: ${route.theme}`,
+    `Language: ${route.language}`,
+  ];
+
+  if (route.learningLevel) {
+    lines.push(`Learning level: ${route.learningLevel}`);
+  }
+
+  if (route.codingStyle) {
+    lines.push(`Preferred coding style: ${route.codingStyle}`);
+  }
+
+  if (route.selectedComponent) {
+    lines.push(`Selected component: ${route.selectedComponent}`);
+  }
+
+  lines.push(
+    "",
+    "Use this context automatically — the user should not need to explain where they are in the app.",
+  );
+
   return lines.join("\n");
 }

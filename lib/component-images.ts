@@ -1,71 +1,40 @@
-/** Component catalog photography — electronics and robotics imagery */
+/** Local product photography — sourced from Wikimedia Commons, Openverse, and Wikipedia */
+
+const LOCAL_FALLBACK = "/components/arduino-uno-r3.jpg";
 
 export const componentImages: Record<string, string> = {
-  "arduino-uno-r3":
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&auto=format&fit=crop",
-  "esp32-devkit":
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85&auto=format&fit=crop",
-  "raspberry-pi-5":
-    "https://images.unsplash.com/photo-1535378917022-76240dbc3f92?w=800&q=85&auto=format&fit=crop",
-  "hc-sr04":
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=85&auto=format&fit=crop",
-  "ir-sensor":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
-  "l298n":
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=85&auto=format&fit=crop",
-  "servo-sg90":
-    "https://images.unsplash.com/photo-1473965768615-bbb7acb08979?w=800&q=85&auto=format&fit=crop",
-  "dc-geared-motor":
-    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85&auto=format&fit=crop",
-  "stepper-nema17":
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=85&auto=format&fit=crop",
-  "jumper-wires":
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&auto=format&fit=crop",
-  breadboard:
-    "https://images.unsplash.com/photo-1501504905252-473bdc47e830?w=800&q=85&auto=format&fit=crop",
-  "oled-display":
-    "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=85&auto=format&fit=crop",
-  "lcd-16x2":
-    "https://images.unsplash.com/photo-1592214539128-2d9a2d0949b2?w=800&q=85&auto=format&fit=crop",
-  "relay-module":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
-  "bluetooth-hc05":
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85&auto=format&fit=crop",
-  "wifi-esp8266":
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85&auto=format&fit=crop",
-  mpu6050:
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=85&auto=format&fit=crop",
-  "flame-sensor":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
-  "gas-sensor-mq2":
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=85&auto=format&fit=crop",
-  "soil-moisture":
-    "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&q=85&auto=format&fit=crop",
-  "pir-motion":
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=85&auto=format&fit=crop",
-  dht11:
-    "https://images.unsplash.com/photo-1592214539128-2d9a2d0949b2?w=800&q=85&auto=format&fit=crop",
-  dht22:
-    "https://images.unsplash.com/photo-1592214539128-2d9a2d0949b2?w=800&q=85&auto=format&fit=crop",
-  buzzer:
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&auto=format&fit=crop",
-  "led-pack":
-    "https://images.unsplash.com/photo-1501504905252-473bdc47e830?w=800&q=85&auto=format&fit=crop",
-  "resistor-kit":
-    "https://images.unsplash.com/photo-1501504905252-473bdc47e830?w=800&q=85&auto=format&fit=crop",
-  "capacitor-kit":
-    "https://images.unsplash.com/photo-1501504905252-473bdc47e830?w=800&q=85&auto=format&fit=crop",
-  "battery-holder":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
-  "18650-battery":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
-  "power-module":
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=85&auto=format&fit=crop",
+  "arduino-uno-r3": "/components/arduino-uno-r3.jpg",
+  "esp32-devkit": "/components/esp32-devkit.jpg",
+  "raspberry-pi-5": "/components/raspberry-pi-5.jpg",
+  "hc-sr04": "/components/hc-sr04.jpg",
+  "ir-sensor": "/components/ir-sensor.jpg",
+  l298n: "/components/l298n.jpg",
+  "servo-sg90": "/components/servo-sg90.jpg",
+  "dc-geared-motor": "/components/dc-geared-motor.jpg",
+  "stepper-nema17": "/components/stepper-nema17.jpg",
+  "jumper-wires": "/components/jumper-wires.jpg",
+  breadboard: "/components/breadboard.jpg",
+  "oled-display": "/components/oled-display.jpg",
+  "lcd-16x2": "/components/lcd-16x2.jpg",
+  "relay-module": "/components/relay-module.jpg",
+  "bluetooth-hc05": "/components/bluetooth-hc05.jpg",
+  "wifi-esp8266": "/components/wifi-esp8266.jpg",
+  mpu6050: "/components/mpu6050.jpg",
+  "flame-sensor": "/components/flame-sensor.jpg",
+  "gas-sensor-mq2": "/components/gas-sensor-mq2.jpg",
+  "soil-moisture": "/components/soil-moisture.jpg",
+  "pir-motion": "/components/pir-motion.jpg",
+  dht11: "/components/dht11.jpg",
+  dht22: "/components/dht22.jpg",
+  buzzer: "/components/buzzer.jpg",
+  "led-pack": "/components/led-pack.jpg",
+  "resistor-kit": "/components/resistor-kit.jpg",
+  "capacitor-kit": "/components/capacitor-kit.jpg",
+  "battery-holder": "/components/battery-holder.jpg",
+  "18650-battery": "/components/18650-battery.jpg",
+  "power-module": "/components/power-module.jpg",
 };
 
 export function getComponentImage(slug: string): string {
-  return (
-    componentImages[slug] ??
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&auto=format&fit=crop"
-  );
+  return componentImages[slug] ?? LOCAL_FALLBACK;
 }

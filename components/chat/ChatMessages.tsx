@@ -8,12 +8,14 @@ import { ChatErrorCard } from "@/components/chat/ChatErrorCard";
 import { LoadingSkeleton } from "@/components/chat/LoadingSkeleton";
 import type { ChatError } from "@/types/chat";
 import type { ChatMessage } from "@/types/message";
+import { cn } from "@/lib/utils";
 
 type ChatMessagesProps = {
   messages: ChatMessage[];
   isTyping: boolean;
   isLoading?: boolean;
   error?: ChatError | null;
+  variant?: "default" | "compact";
   onRegenerate?: () => void;
   onContinue?: (text: string) => void;
   onFeedback?: (messageId: string, feedback: "like" | "dislike" | null) => void;
@@ -24,6 +26,7 @@ type ChatMessagesProps = {
 const VirtualRow = memo(function VirtualRow({
   message,
   isLatest,
+  variant,
   onRegenerate,
   onContinue,
   onFeedback,
@@ -31,6 +34,7 @@ const VirtualRow = memo(function VirtualRow({
 }: {
   message: ChatMessage;
   isLatest: boolean;
+  variant?: "default" | "compact";
   onRegenerate?: () => void;
   onContinue?: (text: string) => void;
   onFeedback?: (feedback: "like" | "dislike" | null) => void;
@@ -40,6 +44,7 @@ const VirtualRow = memo(function VirtualRow({
     <MessageBubble
       message={message}
       isLatest={isLatest}
+      variant={variant}
       onRegenerate={onRegenerate}
       onContinue={onContinue}
       onFeedback={onFeedback}
@@ -53,6 +58,7 @@ export function ChatMessages({
   isTyping,
   isLoading,
   error,
+  variant = "default",
   onRegenerate,
   onContinue,
   onFeedback,
@@ -61,6 +67,7 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const isCompact = variant === "compact";
 
   const virtualizer = useVirtualizer({
     count: messages.length,
@@ -82,11 +89,22 @@ export function ChatMessages({
   const useVirtual = messages.length > 20;
 
   return (
-    <div ref={parentRef} className="flex-1 overflow-y-auto scroll-smooth">
-      <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
+    <div ref={parentRef} className="h-full flex-1 overflow-y-auto scroll-smooth">
+      <div
+        className={cn(
+          "mx-auto w-full",
+          isCompact
+            ? "flex flex-col gap-2.5 px-3 py-3"
+            : "max-w-3xl px-4 py-6 md:px-6",
+        )}
+      >
         {error ? (
-          <div className="mb-4">
-            <ChatErrorCard error={error} onRetry={onRetry} />
+          <div className={isCompact ? "mb-2" : "mb-4"}>
+            <ChatErrorCard
+              error={error}
+              onRetry={onRetry}
+              className={isCompact ? "p-3" : undefined}
+            />
           </div>
         ) : null}
 
@@ -107,6 +125,7 @@ export function ChatMessages({
                 >
                   <VirtualRow
                     message={message}
+                    variant={variant}
                     isLatest={
                       item.index === messages.length - 1 &&
                       !isTyping &&
@@ -128,6 +147,7 @@ export function ChatMessages({
             <VirtualRow
               key={message.id}
               message={message}
+              variant={variant}
               isLatest={
                 index === messages.length - 1 &&
                 !isTyping &&
@@ -146,12 +166,12 @@ export function ChatMessages({
         {isTyping &&
           messages.at(-1)?.role !== "assistant" &&
           !messages.at(-1)?.isStreaming && (
-            <div className="flex w-full py-5">
+            <div className={cn("flex w-full", isCompact ? "py-1" : "py-5")}>
               <TypingIndicator />
             </div>
           )}
 
-        <div ref={bottomRef} className="h-4" aria-hidden="true" />
+        <div ref={bottomRef} className={isCompact ? "h-1" : "h-4"} aria-hidden="true" />
       </div>
     </div>
   );

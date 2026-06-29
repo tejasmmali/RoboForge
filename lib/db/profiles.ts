@@ -4,6 +4,7 @@ import { executeQuery } from "@/lib/db/errors";
 import { logger } from "@/lib/db/logger";
 import { STORAGE_BUCKETS } from "@/lib/db/rls";
 import { uploadToStorage } from "@/lib/db/storage";
+import { avatarFromUserMetadata } from "@/lib/utils/avatar";
 import { profileUpdateSchema } from "@/lib/validations/db";
 import type { DbProfile } from "@/types/database";
 import type { ProfileInsert, ProfileUpdateInput, UserProfile } from "@/types/profile";
@@ -104,7 +105,7 @@ export function profileFromUser(user: User): ProfileInsert {
       (user.user_metadata?.full_name as string | undefined) ??
       (user.user_metadata?.name as string | undefined) ??
       null,
-    avatar_url: (user.user_metadata?.avatar_url as string | undefined) ?? null,
+    avatar_url: avatarFromUserMetadata(user.user_metadata as Record<string, unknown>),
     role: "student",
   };
 }
@@ -112,7 +113,15 @@ export function profileFromUser(user: User): ProfileInsert {
 export async function ensureProfile(user: User): Promise<UserProfile | null> {
   try {
     const existing = await getProfile(user.id);
-    if (existing) return existing;
+    const oauthAvatar = avatarFromUserMetadata(user.user_metadata as Record<string, unknown>);
+
+    if (existing) {
+      if (!existing.avatar_url && oauthAvatar) {
+        return await updateProfile(user.id, { avatar_url: oauthAvatar });
+      }
+      return existing;
+    }
+
     return await upsertProfile(profileFromUser(user));
   } catch (error) {
     logger.auth("ensureProfile failed", { error });

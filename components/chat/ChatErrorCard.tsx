@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   AlertCircle,
   KeyRound,
+  LogIn,
   ServerCrash,
   WifiOff,
   Clock,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 const ERROR_ICONS = {
   network: WifiOff,
   rate_limit: Clock,
+  unauthorized: LogIn,
   invalid_key: KeyRound,
   server: ServerCrash,
   empty: AlertCircle,
@@ -45,8 +47,10 @@ export function ChatErrorCard({ error, onRetry, className }: ChatErrorCardProps)
         <div className="min-w-0 flex-1">
           <p className="font-heading text-[13px] font-medium text-foreground">
             {error.code === "rate_limit"
-              ? "Rate limit reached"
-              : error.code === "network"
+              ? "Message limit reached"
+              : error.code === "unauthorized"
+                ? "Sign in required"
+                : error.code === "network"
                 ? "No connection"
                 : error.code === "invalid_key"
                   ? "API configuration error"

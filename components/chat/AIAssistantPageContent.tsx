@@ -1,28 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ConversationSidebar } from "@/components/chat/ConversationSidebar";
 import { ChatWindow } from "@/components/chat/ChatWindow";
-import { FeatureModal } from "@/components/chat/FeatureModal";
-import { useChat } from "@/hooks/useChat";
+import { AIAssistantPageSkeleton } from "@/components/chat/LoadingSkeleton";
+import { PromptLibrary } from "@/components/chat/PromptLibrary";
+import { ToolPanel } from "@/components/chat/ToolPanel";
+import { useGlobalChat } from "@/components/chat/GlobalChatProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { quickCategories } from "@/lib/chat-data";
-import type { AIFeature, QuickCategory } from "@/types/chat";
+import type { QuickCategory } from "@/types/chat";
 import type { MessageImage } from "@/types/message";
 
-export function AIAssistantPageContent() {
+function AIAssistantPageInner() {
+  const { loading: authLoading } = useAuth();
   const {
     conversations,
+    filteredConversations,
     activeConversation,
     activeConversationId,
     isStreaming,
     isLoadingHistory,
+    isLoadingConversation,
     error,
     settings,
     setSettings,
     suggestions,
+    assistantMode,
     newChat,
     selectConversation,
+    deleteChat,
     sendMessage,
+    insertPrompt,
     stopGenerating,
     regenerateLastResponse,
     setMessageFeedback,
@@ -30,15 +40,16 @@ export function AIAssistantPageContent() {
     exportChat,
     resetConversation,
     clearChats,
-  } = useChat();
+    quotaHint,
+  } = useGlobalChat();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeFeature, setActiveFeature] = useState<AIFeature | null>(null);
 
   const hasMessages = (activeConversation?.messages.length ?? 0) > 0;
   const isEmpty = conversations.length === 0;
-  const showWelcome = !isEmpty && !hasMessages && !isStreaming;
+  const showWelcome = !isEmpty && !hasMessages && !isStreaming && !isLoadingConversation;
+  const showPageSkeleton = authLoading || isLoadingHistory;
 
   const handleSend = (text: string, images?: MessageImage[]) => {
     void sendMessage(text, {
@@ -55,15 +66,32 @@ export function AIAssistantPageContent() {
     }
   };
 
+  if (showPageSkeleton) {
+    return (
+      <AnimatePresence mode="wait">
+        <AIAssistantPageSkeleton key="page-skeleton" />
+      </AnimatePresence>
+    );
+  }
+
   return (
-    <div className="flex h-full overflow-hidden">
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="page-content"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="flex h-full overflow-hidden"
+      >
       <ConversationSidebar
-        conversations={conversations}
+        conversations={filteredConversations}
         activeConversationId={activeConversationId}
         settings={settings}
         onSettingsChange={setSettings}
         onNewChat={newChat}
         onSelectConversation={selectConversation}
+        onDeleteConversation={deleteChat}
         onClearChats={clearChats}
         onExportChat={exportChat}
         onResetConversation={resetConversation}
@@ -80,6 +108,7 @@ export function AIAssistantPageContent() {
         messages={activeConversation?.messages ?? []}
         isStreaming={isStreaming}
         isLoadingHistory={isLoadingHistory}
+        isLoadingConversation={isLoadingConversation}
         error={error}
         settings={settings}
         suggestions={suggestions}
@@ -92,12 +121,21 @@ export function AIAssistantPageContent() {
         onOpenSidebar={() => setSidebarOpen(true)}
         showWelcome={showWelcome}
         isEmpty={isEmpty}
+        subtitle={assistantMode}
+        quotaHint={quotaHint}
       />
 
-      <FeatureModal
-        feature={activeFeature}
-        onClose={() => setActiveFeature(null)}
-      />
-    </div>
+      <PromptLibrary onInsert={insertPrompt} />
+      <ToolPanel onRunTool={insertPrompt} />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+export function AIAssistantPageContent() {
+  return (
+    <Suspense fallback={<AIAssistantPageSkeleton />}>
+      <AIAssistantPageInner />
+    </Suspense>
   );
 }

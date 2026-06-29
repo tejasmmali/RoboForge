@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, Flame, FolderCheck, Pencil } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { UserProfile } from "@/types/profile";
+import { AvatarImage } from "@/components/ui/AvatarImage";
 
 type ProfileSummaryProps = {
   user: User;
@@ -24,8 +25,6 @@ export function ProfileSummary({
   embedded,
 }: ProfileSummaryProps) {
   const email = profile?.email ?? user.email ?? "";
-  const avatarUrl = profile?.avatar_url ?? user.user_metadata?.avatar_url;
-  const initials = displayName.charAt(0).toUpperCase();
   const memberSince = profile?.created_at ?? user.created_at;
 
   return (
@@ -40,18 +39,7 @@ export function ProfileSummary({
       }
     >
       <div className="flex flex-col items-center text-center">
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt=""
-            className="h-16 w-16 rounded-full border border-border object-cover shadow-soft"
-          />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-foreground font-heading text-xl font-medium text-background shadow-soft">
-            {initials}
-          </div>
-        )}
+        <AvatarImage user={user} profile={profile} name={displayName} size="md" />
         <h2 className="mt-3 font-heading text-[15px] font-medium">{displayName}</h2>
         <p className="mt-0.5 truncate text-[12px] text-muted">{email}</p>
       </div>

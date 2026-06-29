@@ -6,6 +6,7 @@ import { ChatErrorCard } from "@/components/chat/ChatErrorCard";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessages } from "@/components/chat/ChatMessages";
 import { ChatWelcome } from "@/components/chat/ChatWelcome";
+import { ChatWindowSkeleton } from "@/components/chat/LoadingSkeleton";
 import { EmptyState } from "@/components/chat/EmptyState";
 import { PromptSuggestions } from "@/components/chat/PromptSuggestions";
 import type { ChatSettings } from "@/types/chat";
@@ -18,6 +19,7 @@ type ChatWindowProps = {
   messages: ChatMessage[];
   isStreaming: boolean;
   isLoadingHistory?: boolean;
+  isLoadingConversation?: boolean;
   error: ChatError | null;
   settings: ChatSettings;
   suggestions: string[];
@@ -31,6 +33,8 @@ type ChatWindowProps = {
   onOpenSettings?: () => void;
   showWelcome: boolean;
   isEmpty: boolean;
+  subtitle?: string;
+  quotaHint?: string | null;
 };
 
 export function ChatWindow({
@@ -38,6 +42,7 @@ export function ChatWindow({
   messages,
   isStreaming,
   isLoadingHistory,
+  isLoadingConversation,
   error,
   suggestions,
   onSend,
@@ -50,7 +55,11 @@ export function ChatWindow({
   onOpenSettings,
   showWelcome,
   isEmpty,
+  subtitle = "Robotics engineering mentor",
+  quotaHint,
 }: ChatWindowProps) {
+  const isContentLoading = Boolean(isLoadingHistory || isLoadingConversation);
+
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-background">
       <header className="flex shrink-0 items-center justify-between border-b border-border/60 px-3 py-2.5 md:px-4">
@@ -67,9 +76,7 @@ export function ChatWindow({
             <p className="font-heading text-[13px] font-medium">
               {activeConversation?.title ?? "RoboForge AI"}
             </p>
-            <p className="text-[10px] text-muted-foreground">
-              Robotics engineering mentor
-            </p>
+            <p className="text-[10px] text-muted-foreground">{subtitle}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -100,7 +107,18 @@ export function ChatWindow({
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {isEmpty ? (
+          {isContentLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="h-full"
+            >
+              <ChatWindowSkeleton />
+            </motion.div>
+          ) : isEmpty ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0 }}
@@ -154,7 +172,7 @@ export function ChatWindow({
 
       {!isEmpty && (
         <>
-          {messages.length > 0 && messages.length < 4 && !isStreaming && (
+          {messages.length > 0 && messages.length < 4 && !isStreaming && !isContentLoading && (
             <div className="shrink-0 px-4 pb-2 md:px-6">
               <PromptSuggestions
                 suggestions={suggestions.slice(0, 4)}
@@ -166,8 +184,9 @@ export function ChatWindow({
           <ChatInput
             onSend={onSend}
             onStop={onStop}
-            disabled={isLoadingHistory}
+            disabled={isContentLoading}
             isStreaming={isStreaming}
+            quotaHint={quotaHint}
           />
         </>
       )}

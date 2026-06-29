@@ -32,12 +32,12 @@ export function RelatedProjects({ slugs, currentSlug }: RelatedProjectsProps) {
             whileHover={{ y: -4 }}
             className="hover-glow w-[280px] shrink-0 overflow-hidden rounded-default border border-border bg-surface shadow-soft sm:w-[300px]"
           >
-            <div className="relative aspect-video overflow-hidden">
+            <div className="relative aspect-[5/4] overflow-hidden bg-gradient-to-b from-muted/10 to-muted/25">
               <Image
                 src={project.image}
                 alt={project.title}
                 fill
-                className="object-cover transition-transform duration-500 hover:scale-[1.04]"
+                className="object-contain p-3 transition-transform duration-500 hover:scale-[1.03]"
                 sizes="300px"
               />
               <DifficultyBadge

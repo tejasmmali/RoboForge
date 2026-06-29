@@ -203,6 +203,15 @@ export type DbUserSettings = {
   updated_at: string;
 };
 
+export type DbAiChatUsage = {
+  id: string;
+  user_id: string;
+  usage_date: string;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -221,6 +230,7 @@ export type Database = {
       achievements: { Row: DbAchievement; Insert: Partial<DbAchievement>; Update: Partial<DbAchievement> };
       resources: { Row: DbResource; Insert: Partial<DbResource>; Update: Partial<DbResource> };
       user_settings: { Row: DbUserSettings; Insert: Partial<DbUserSettings>; Update: Partial<DbUserSettings> };
+      ai_chat_usage: { Row: DbAiChatUsage; Insert: Partial<DbAiChatUsage>; Update: Partial<DbAiChatUsage> };
     };
   };
 };

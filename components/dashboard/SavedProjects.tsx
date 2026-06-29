@@ -7,6 +7,7 @@ import { ArrowRight, BookmarkMinus } from "lucide-react";
 import type { SavedProject } from "@/types/dashboard";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
+import { useRemoveProjectBookmark } from "@/hooks/useBookmarks";
 
 type SavedProjectsProps = {
   projects: SavedProject[];
@@ -21,6 +22,8 @@ function formatDate(dateStr: string) {
 }
 
 export function SavedProjects({ projects, embedded }: SavedProjectsProps) {
+  const removeBookmark = useRemoveProjectBookmark();
+
   const content =
     projects.length === 0 ? (
       <DashboardEmptyState
@@ -69,7 +72,9 @@ export function SavedProjects({ projects, embedded }: SavedProjectsProps) {
                   </Link>
                   <button
                     type="button"
-                    className="ml-auto flex items-center gap-1 text-[11px] text-muted transition-colors hover:text-foreground"
+                    onClick={() => removeBookmark.mutate(project.project_slug)}
+                    disabled={removeBookmark.isPending}
+                    className="ml-auto flex items-center gap-1 text-[11px] text-muted transition-colors hover:text-foreground disabled:opacity-50"
                     aria-label="Remove bookmark"
                   >
                     <BookmarkMinus className="h-3.5 w-3.5" strokeWidth={1.75} />

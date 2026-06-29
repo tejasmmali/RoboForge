@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Bot, Search, Trash2 } from "lucide-react";
 import type { ChatHistoryEntry } from "@/types/dashboard";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
+import { useDeleteChatConversation } from "@/hooks/useChatHistory";
 
 type AIChatHistoryProps = {
   conversations: ChatHistoryEntry[];
@@ -21,6 +22,7 @@ function formatDate(dateStr: string) {
 
 export function AIChatHistory({ conversations, embedded }: AIChatHistoryProps) {
   const [query, setQuery] = useState("");
+  const deleteConversation = useDeleteChatConversation();
 
   const filtered = useMemo(() => {
     if (!query.trim()) return conversations;
@@ -94,7 +96,7 @@ export function AIChatHistory({ conversations, embedded }: AIChatHistoryProps) {
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <Link
-                  href="/ai-assistant"
+                  href={`/ai-assistant?conversation=${conv.id}`}
                   className="inline-flex items-center gap-1 text-[12px] font-medium opacity-0 transition-all group-hover:opacity-100 hover:text-accent"
                 >
                   Continue
@@ -102,7 +104,9 @@ export function AIChatHistory({ conversations, embedded }: AIChatHistoryProps) {
                 </Link>
                 <button
                   type="button"
-                  className="rounded-[8px] p-1.5 text-muted opacity-0 transition-all hover:bg-background hover:text-foreground group-hover:opacity-100"
+                  onClick={() => deleteConversation.mutate(conv.id)}
+                  disabled={deleteConversation.isPending}
+                  className="rounded-[8px] p-1.5 text-muted opacity-0 transition-all hover:bg-background hover:text-foreground group-hover:opacity-100 disabled:opacity-50"
                   aria-label="Delete conversation"
                 >
                   <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />

@@ -1,58 +1,71 @@
-/** Curated Unsplash photography — robotics, electronics, and lab imagery */
+/** Local project photography — sourced from Openverse and Wikipedia */
 
-export const heroImage =
-  "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1400&q=85&auto=format&fit=crop";
+const img = (id: string, w = 900) =>
+  `https://images.unsplash.com/${id}?w=${w}&q=85&auto=format&fit=crop`;
 
-export const projectImages: Record<string, string> = {
-  "line-follower-robot":
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=85&auto=format&fit=crop",
-  "obstacle-avoiding-robot":
-    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=900&q=85&auto=format&fit=crop",
-  "bluetooth-car":
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85&auto=format&fit=crop",
-  "robotic-arm":
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=900&q=85&auto=format&fit=crop",
-  "smart-dustbin":
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=900&q=85&auto=format&fit=crop",
-  "iot-weather-station":
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&q=85&auto=format&fit=crop",
-  "smart-agriculture":
-    "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=900&q=85&auto=format&fit=crop",
-  "gesture-controlled-robot":
-    "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=900&q=85&auto=format&fit=crop",
-  "maze-solving-robot":
-    "https://images.unsplash.com/photo-1535378917022-76240dbc3f92?w=900&q=85&auto=format&fit=crop",
-  "voice-controlled-home":
-    "https://images.unsplash.com/photo-1558002038-1055907df827?w=900&q=85&auto=format&fit=crop",
-  "weather-monitoring-station":
-    "https://images.unsplash.com/photo-1592214539128-2d9a2d0949b2?w=900&q=85&auto=format&fit=crop",
-  "self-balancing-robot":
-    "https://images.unsplash.com/photo-1473965768615-bbb7acb08979?w=900&q=85&auto=format&fit=crop",
-  drone:
-    "https://images.unsplash.com/photo-1473965768615-bbb7acb08979?w=900&q=85&auto=format&fit=crop",
-};
+export const heroImage = img("photo-1485827404703-89b55fcc595e", 1400);
+
+const PROJECT_SLUGS = [
+  "line-follower-robot",
+  "obstacle-avoiding-robot",
+  "bluetooth-car",
+  "wifi-robot-esp32",
+  "robotic-arm",
+  "smart-dustbin",
+  "voice-controlled-home",
+  "iot-weather-station",
+  "smart-agriculture",
+  "rfid-door-lock",
+  "fire-fighting-robot",
+  "gesture-controlled-robot",
+  "maze-solving-robot",
+  "smart-parking-system",
+  "solar-tracking-system",
+  "self-balancing-robot",
+] as const;
+
+const LOCAL_FALLBACK = "/projects/line-follower-robot.jpg";
+
+function projectHeroPath(slug: string): string {
+  return `/projects/${slug}.jpg`;
+}
+
+function projectGalleryPath(slug: string, index: 2 | 3): string {
+  return `/projects/${slug}-${index}.jpg`;
+}
+
+export const projectImages: Record<string, string> = Object.fromEntries(
+  PROJECT_SLUGS.map((slug) => [slug, projectHeroPath(slug)]),
+);
+
+/** Three unique gallery images per project — hero plus two build/detail shots. */
+export const projectGalleryImages: Record<string, string[]> = Object.fromEntries(
+  PROJECT_SLUGS.map((slug) => [
+    slug,
+    [
+      projectHeroPath(slug),
+      projectGalleryPath(slug, 2),
+      projectGalleryPath(slug, 3),
+    ],
+  ]),
+);
 
 export const bentoImages = {
-  projects:
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1000&q=85&auto=format&fit=crop",
-  community:
-    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=85&auto=format&fit=crop",
-  roadmap:
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=85&auto=format&fit=crop",
+  projects: img("photo-1581092918056-0c4c3acd3789", 1000),
+  community: img("photo-1522071820081-009f0129c71c", 800),
+  roadmap: img("photo-1581092160562-40aa08e78837", 800),
 } as const;
 
 export const pillarImages = {
-  learn:
-    "https://images.unsplash.com/photo-1501504905252-473bdc47e830?w=800&q=85&auto=format&fit=crop",
-  practice:
-    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&q=85&auto=format&fit=crop",
-  build:
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&auto=format&fit=crop",
+  learn: img("photo-1501504905252-473bdc47e830", 800),
+  practice: img("photo-1581091226825-a6a2a5aee158", 800),
+  build: img("photo-1518770660439-4636190af475", 800),
 } as const;
 
 export function getProjectImage(slug: string): string {
-  return (
-    projectImages[slug] ??
-    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=900&q=85&auto=format&fit=crop"
-  );
+  return projectImages[slug] ?? LOCAL_FALLBACK;
+}
+
+export function getProjectGalleryImages(slug: string): string[] {
+  return projectGalleryImages[slug] ?? [getProjectImage(slug)];
 }

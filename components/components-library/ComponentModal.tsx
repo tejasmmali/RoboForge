@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Bookmark,
   Download,
   ExternalLink,
   FileText,
@@ -15,7 +16,9 @@ import {
   AvailabilityDot,
   ComponentBadge,
 } from "@/components/components-library/ComponentBadge";
+import { useToggleComponentBookmark } from "@/hooks/useBookmarks";
 import type { ComponentItem } from "@/lib/components-catalog";
+import { cn } from "@/lib/utils";
 
 type ComponentModalProps = {
   component: ComponentItem | null;
@@ -23,6 +26,15 @@ type ComponentModalProps = {
 };
 
 export function ComponentModal({ component, onClose }: ComponentModalProps) {
+  const { isSaved, toggle: toggleBookmark } = useToggleComponentBookmark({
+    componentSlug: component?.slug ?? "",
+    name: component?.name,
+    category: component?.categoryLabel,
+    image: component?.image,
+    specifications: component?.specifications.map((s) => `${s.label}: ${s.value}`).join(" · "),
+    buyUrl: component?.buyUrl,
+  });
+
   useEffect(() => {
     if (!component) return;
 
@@ -190,6 +202,23 @@ export function ComponentModal({ component, onClose }: ComponentModalProps) {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3 border-t border-border pt-6">
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={toggleBookmark}
+                  aria-label={isSaved ? "Remove bookmark" : "Save component"}
+                  aria-pressed={isSaved}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-default border px-4 py-2.5 text-[13px] font-medium transition-colors",
+                    isSaved
+                      ? "border-accent/30 bg-accent/5 text-accent"
+                      : "border-border text-muted hover:border-border-strong hover:text-foreground",
+                  )}
+                >
+                  <Bookmark className={cn("h-3.5 w-3.5", isSaved && "fill-current")} strokeWidth={1.75} />
+                  {isSaved ? "Saved" : "Save"}
+                </motion.button>
                 {component.datasheetUrl && (
                   <a
                     href={component.datasheetUrl}

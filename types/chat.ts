@@ -48,6 +48,7 @@ export type ChatSettings = {
 export type ChatErrorCode =
   | "network"
   | "rate_limit"
+  | "unauthorized"
   | "invalid_key"
   | "server"
   | "empty"
@@ -78,8 +79,21 @@ export type ChatApiRequest = {
   messages: GeminiMessage[];
   projectContext?: ProjectChatContext;
   memoryContext?: ChatMemoryContext;
+  routeContext?: GlobalRouteContext;
   settings?: Partial<ChatSettings>;
   stream?: boolean;
+};
+
+export type GlobalRouteContext = {
+  pathname: string;
+  pageLabel: string;
+  assistantMode: string;
+  isAuthenticated: boolean;
+  theme: string;
+  language: string;
+  learningLevel?: string;
+  codingStyle?: string;
+  selectedComponent?: string | null;
 };
 
 export type ChatStreamEvent =
@@ -94,8 +108,13 @@ export type SendMessageOptions = {
   regenerate?: boolean;
 };
 
-export type { ChatMessage, Conversation, MessageFeedback, MessageImage, MessageRole } from "@/types/message";
+export type { ChatQuotaStatus } from "@/lib/ai/chat-limits";
 export type {
+  ChatMessage,
+  Conversation,
+  MessageFeedback,
+  MessageImage,
+  MessageRole,
   ConversationUpdateInput,
   CreateMessageInput,
   ConversationSearchParams,

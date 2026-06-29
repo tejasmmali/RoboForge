@@ -1,6 +1,7 @@
 import { Bot, Github, Linkedin, Mail } from "lucide-react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { siteContact } from "@/lib/site-contact";
 
 const footerLinks = {
   platform: [
@@ -11,7 +12,7 @@ const footerLinks = {
   company: [
     { href: "/about", label: "About" },
     { href: "/about#team", label: "Team" },
-    { href: "/about#contact", label: "Contact" },
+    { href: "/contact", label: "Contact" },
   ],
   resources: [
     { href: "/projects", label: "Getting Started" },
@@ -22,17 +23,17 @@ const footerLinks = {
 
 const socialLinks = [
   {
-    href: "https://github.com",
+    href: siteContact.github,
     label: "GitHub",
     icon: Github,
   },
   {
-    href: "https://linkedin.com",
+    href: siteContact.linkedin,
     label: "LinkedIn",
     icon: Linkedin,
   },
   {
-    href: "mailto:hello@roboforge.dev",
+    href: siteContact.mailto,
     label: "Email",
     icon: Mail,
   },
@@ -70,8 +71,8 @@ export function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
                     className="hover-glow flex h-9 w-9 items-center justify-center rounded-default border border-border bg-background text-muted transition-colors hover:text-foreground"
                     aria-label={label}
                   >

@@ -79,69 +79,83 @@ export const sortOptions: { id: ComponentSort; label: string }[] = [
 
 export const featuredComponentSlug = "arduino-uno-r3";
 
-export const catalogCategories = [
+const catalogCategoryDefs = [
   {
     id: "arduino",
     label: "Arduino Boards",
     icon: "cpu" as const,
-    count: 12,
+    count: 0,
     description: "Classic ATmega boards for learning embedded programming.",
   },
   {
     id: "esp32",
     label: "ESP Boards",
     icon: "radio" as const,
-    count: 18,
+    count: 0,
     description: "Wi-Fi and Bluetooth enabled microcontrollers.",
   },
   {
     id: "sensors",
     label: "Sensors",
     icon: "gauge" as const,
-    count: 85,
+    count: 0,
     description: "Ultrasonic, IR, environmental, and motion sensors.",
   },
   {
     id: "motors",
     label: "Motors",
     icon: "zap" as const,
-    count: 24,
+    count: 0,
     description: "DC, stepper, and gear motors for locomotion.",
   },
   {
     id: "power",
     label: "Power Modules",
     icon: "battery" as const,
-    count: 16,
+    count: 0,
     description: "Batteries, holders, and voltage regulators.",
   },
   {
     id: "displays",
     label: "Displays",
     icon: "monitor" as const,
-    count: 14,
+    count: 0,
     description: "OLED, LCD, and LED matrix modules.",
   },
   {
     id: "communication",
     label: "Communication",
     icon: "wifi" as const,
-    count: 22,
+    count: 0,
     description: "Bluetooth, Wi-Fi, and serial modules.",
   },
   {
-    id: "mechanical",
-    label: "Mechanical Parts",
+    id: "drivers",
+    label: "Motor Drivers",
     icon: "wrench" as const,
-    count: 31,
-    description: "Chassis, wheels, brackets, and fasteners.",
+    count: 0,
+    description: "H-bridge and stepper driver modules.",
   },
   {
-    id: "tools",
-    label: "Tools",
+    id: "servo",
+    label: "Servos",
     icon: "tool" as const,
-    count: 28,
-    description: "Soldering, multimeters, and prototyping tools.",
+    count: 0,
+    description: "Micro and high-torque servo motors.",
+  },
+  {
+    id: "development-boards",
+    label: "Development Boards",
+    icon: "cpu" as const,
+    count: 0,
+    description: "Arduino, ESP32, and Raspberry Pi boards.",
+  },
+  {
+    id: "iot",
+    label: "IoT Modules",
+    icon: "wifi" as const,
+    count: 0,
+    description: "Relays, buck converters, and connectivity modules.",
   },
 ];
 
@@ -150,31 +164,31 @@ export const learningResources = [
     id: "sensor-guide",
     title: "How to Choose Sensors",
     description: "Match sensor types to your project requirements.",
-    href: "/chatbot",
+    href: "/ai-assistant",
   },
   {
     id: "motor-guide",
     title: "Motor Selection Guide",
     description: "DC vs servo vs stepper — pick the right actuator.",
-    href: "/chatbot",
+    href: "/ai-assistant",
   },
   {
     id: "power-guide",
     title: "Power Supply Guide",
     description: "Voltage, current, and battery safety fundamentals.",
-    href: "/chatbot",
+    href: "/ai-assistant",
   },
   {
     id: "arduino-basics",
     title: "Arduino Basics",
     description: "Pins, sketches, and your first upload.",
-    href: "/chatbot",
+    href: "/ai-assistant",
   },
   {
     id: "esp32-basics",
     title: "ESP32 Basics",
     description: "Wi-Fi setup, GPIO, and dual-core programming.",
-    href: "/chatbot",
+    href: "/ai-assistant",
   },
 ];
 
@@ -1337,7 +1351,12 @@ export function filterComponents(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.shortDescription.toLowerCase().includes(q) ||
+        c.description.toLowerCase().includes(q) ||
         c.categoryLabel.toLowerCase().includes(q) ||
+        c.operatingVoltage.toLowerCase().includes(q) ||
+        c.communicationProtocol.toLowerCase().includes(q) ||
+        c.applications.some((a) => a.toLowerCase().includes(q)) ||
+        c.compatibleBoards.some((b) => b.toLowerCase().includes(q)) ||
         c.compatibility.some((x) => x.toLowerCase().includes(q)),
     );
   }
@@ -1366,3 +1385,12 @@ export function filterComponents(
 export function getComponentBySlug(slug: string): ComponentItem | undefined {
   return components.find((c) => c.slug === slug);
 }
+
+export function getCatalogCategories() {
+  return catalogCategoryDefs.map((cat) => ({
+    ...cat,
+    count: components.filter((c) => c.category === cat.id).length,
+  }));
+}
+
+export const catalogCategories = catalogCategoryDefs;

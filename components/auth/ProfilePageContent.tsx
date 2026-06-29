@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Bookmark,
@@ -17,33 +18,56 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Container } from "@/components/ui/Container";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { useAuth } from "@/hooks/useAuth";
-
-const stats = [
-  { label: "Saved Projects", value: "4", icon: FolderCheck },
-  { label: "Completed Projects", value: "1", icon: FolderCheck },
-  { label: "Bookmarked Components", value: "12", icon: Bookmark },
-  { label: "AI Conversations", value: "7", icon: Bot },
-];
-
-const activity = [
-  "Completed Obstacle Avoiding Robot guide",
-  "Bookmarked HC-SR04 sensor",
-  "Started AI chat about L298N wiring",
-  "Saved Line Follower project",
-];
+import { useSavedProjects, useSavedComponents } from "@/hooks/useBookmarks";
+import { useProgressList } from "@/hooks/useProgress";
+import { listConversations } from "@/lib/db/chat";
+import { queryKeys } from "@/lib/db/query-keys";
+import { useQuery } from "@tanstack/react-query";
+import { AvatarImage } from "@/components/ui/AvatarImage";
 
 function ProfileContent() {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
+  const savedProjects = useSavedProjects();
+  const savedComponents = useSavedComponents();
+  const progress = useProgressList();
+  const chatHistory = useQuery({
+    queryKey: queryKeys.chat.conversations(user?.id ?? ""),
+    queryFn: () => listConversations(user!.id, { pageSize: 50 }),
+    enabled: Boolean(user?.id),
+  });
+
+  const stats = useMemo(() => {
+    const progressItems = progress.data ?? [];
+    const completedCount = progressItems.filter((p) => p.progress >= 100).length;
+    return [
+      { label: "Saved Projects", value: String(savedProjects.data?.length ?? 0), icon: FolderCheck },
+      { label: "Completed Projects", value: String(completedCount), icon: FolderCheck },
+      { label: "Bookmarked Components", value: String(savedComponents.data?.length ?? 0), icon: Bookmark },
+      { label: "AI Conversations", value: String(chatHistory.data?.length ?? 0), icon: Bot },
+    ];
+  }, [chatHistory.data, progress.data, savedComponents.data, savedProjects.data]);
+
+  const activity = useMemo(() => {
+    const items: string[] = [];
+    for (const p of savedProjects.data?.slice(0, 2) ?? []) {
+      items.push(`Saved ${p.title || p.projectSlug} project`);
+    }
+    for (const c of savedComponents.data?.slice(0, 2) ?? []) {
+      items.push(`Bookmarked ${c.name || c.componentSlug}`);
+    }
+    for (const chat of chatHistory.data?.slice(0, 2) ?? []) {
+      items.push(`AI chat: ${chat.title}`);
+    }
+    return items;
+  }, [chatHistory.data, savedComponents.data, savedProjects.data]);
 
   const displayName =
     profile?.full_name ??
     (user?.user_metadata?.full_name as string | undefined) ??
     "RoboForge User";
   const email = profile?.email ?? user?.email ?? "";
-  const avatarUrl = profile?.avatar_url ?? user?.user_metadata?.avatar_url;
   const createdAt = profile?.created_at ?? user?.created_at;
-  const initials = displayName.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     await signOut();
@@ -56,18 +80,7 @@ function ProfileContent() {
       <ScrollReveal>
         <div className="rounded-default border border-border bg-surface/80 p-8 backdrop-blur-sm md:p-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-8">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt=""
-                className="h-24 w-24 rounded-full border border-border object-cover shadow-soft"
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-border bg-foreground font-heading text-3xl font-medium text-background shadow-soft">
-                {initials}
-              </div>
-            )}
+            <AvatarImage user={user} profile={profile} name={displayName} size="xl" />
             <div className="flex-1">
               <h1 className="font-heading text-2xl font-medium tracking-tight md:text-3xl">
                 {displayName}
@@ -137,15 +150,19 @@ function ProfileContent() {
             Recent Activity
           </h2>
           <ul className="mt-4 space-y-3" role="list">
-            {activity.map((item) => (
-              <li
-                key={item}
-                className="flex items-center gap-2.5 text-[13px] text-muted"
-              >
-                <User className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
-                {item}
-              </li>
-            ))}
+            {activity.length === 0 ? (
+              <li className="text-[13px] text-muted">No recent activity yet.</li>
+            ) : (
+              activity.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-center gap-2.5 text-[13px] text-muted"
+                >
+                  <User className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                  {item}
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </ScrollReveal>

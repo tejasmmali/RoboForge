@@ -25,7 +25,8 @@ export const bookmarkProjectSchema = z.object({
   projectSlug: z.string().min(1).max(120),
   title: z.string().max(200).optional(),
   difficulty: z.string().max(40).optional(),
-  image: z.string().url().optional(),
+  /** Relative paths (/projects/…) or absolute URLs */
+  image: z.string().max(500).optional(),
 });
 
 export const bookmarkComponentSchema = z.object({

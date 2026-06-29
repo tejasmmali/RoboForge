@@ -1,9 +1,11 @@
 import type {
   ChatApiRequest,
   ChatError,
+  ChatQuotaStatus,
   ChatStreamEvent,
   GeminiResponse,
 } from "@/types/chat";
+import { sanitizeChatApiRequest } from "@/lib/chat/sanitize-api-request";
 
 function parseStreamLine(line: string): ChatStreamEvent | null {
   if (!line.startsWith("data: ")) return null;
@@ -24,21 +26,39 @@ export async function streamChatMessage(
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...request, stream: true }),
+    body: JSON.stringify(sanitizeChatApiRequest({ ...request, stream: true })),
     signal: options?.signal,
   });
 
   if (!response.ok) {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("text/event-stream") && response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const line = buffer.split("\n").find((entry) => entry.startsWith("data: "));
+        const event = line ? parseStreamLine(line.trim()) : null;
+        if (event?.type === "error") {
+          return { text: "", error: event.error };
+        }
+      }
+    }
+
     const data = (await response.json().catch(() => ({}))) as {
       error?: ChatError;
     };
-    return {
-      text: "",
-      error: data.error ?? {
-        code: "server",
-        message: "Failed to reach the AI service.",
-      },
-    };
+    const error = data.error ?? {
+      code: response.status === 429 ? "rate_limit" : "server",
+      message:
+        response.status === 429
+          ? "You've reached your AI message limit."
+          : "Failed to reach the AI service.",
+    } as ChatError;
+    return { text: "", error };
   }
 
   const reader = response.body?.getReader();
@@ -93,7 +113,7 @@ export async function sendChatMessage(
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...request, stream: false }),
+    body: JSON.stringify(sanitizeChatApiRequest({ ...request, stream: false })),
     signal: options?.signal,
   });
 
@@ -107,11 +127,20 @@ export async function sendChatMessage(
     }
     return {
       error: {
-        code: "server",
+        code:
+          response.status === 401
+            ? "unauthorized"
+            : response.status === 429
+              ? "rate_limit"
+              : "server",
         message:
-          typeof data.error === "string"
-            ? data.error
-            : "Failed to generate response.",
+          response.status === 401
+            ? "Sign in to use the AI assistant."
+            : response.status === 429
+              ? "You've reached your AI message limit."
+              : typeof data.error === "string"
+                ? data.error
+                : "Failed to generate response.",
       },
     };
   }
@@ -142,4 +171,14 @@ export function downloadTextFile(filename: string, content: string) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+export async function fetchChatQuota(): Promise<ChatQuotaStatus | null> {
+  try {
+    const response = await fetch("/api/chat/usage");
+    if (!response.ok) return null;
+    return (await response.json()) as ChatQuotaStatus;
+  } catch {
+    return null;
+  }
 }

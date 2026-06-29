@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 type MarkdownRendererProps = {
   content: string;
   className?: string;
+  compact?: boolean;
 };
 
 function renderInline(text: string) {
@@ -73,9 +74,28 @@ function renderInline(text: string) {
   });
 }
 
-export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  className,
+  compact = false,
+}: MarkdownRendererProps) {
   const elements: ReactNode[] = [];
   let codeLang = "cpp";
+  const pClass = compact
+    ? "my-1 text-[12px] leading-relaxed text-foreground/90"
+    : "my-2 text-[13px] leading-relaxed text-muted";
+  const quoteClass = compact
+    ? "my-1 border-l-2 border-border pl-3 text-[12px] text-muted"
+    : "my-3 border-l-2 border-accent/30 pl-4 text-[13px] italic text-muted";
+  const h2Class = compact
+    ? "mb-1 mt-2 font-heading text-[14px] font-medium text-foreground"
+    : "mb-2 mt-5 font-heading text-[18px] font-medium tracking-tight text-foreground";
+  const h3Class = compact
+    ? "mb-1 mt-2 font-heading text-[13px] font-medium text-foreground"
+    : "mb-2 mt-4 font-heading text-[15px] font-medium tracking-tight text-foreground";
+  const liClass = compact
+    ? "ml-3 list-disc text-[12px] text-foreground/90"
+    : "ml-4 list-disc text-[13px] text-muted";
 
   const lines = content.split("\n");
   let buffer: string[] = [];
@@ -91,16 +111,13 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     }
     if (text.startsWith("> ")) {
       elements.push(
-        <blockquote
-          key={key}
-          className="my-3 border-l-2 border-accent/30 pl-4 text-[13px] italic text-muted"
-        >
+        <blockquote key={key} className={quoteClass}>
           {renderInline(text.slice(2))}
         </blockquote>,
       );
     } else {
       elements.push(
-        <p key={key} className="my-2 text-[13px] leading-relaxed text-muted">
+        <p key={key} className={pClass}>
           {renderInline(text)}
         </p>,
       );
@@ -181,10 +198,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
       flushParagraph(`p-${blockIndex++}`);
       flushTable(`t-${blockIndex++}`);
       elements.push(
-        <h2
-          key={`h1-${blockIndex++}`}
-          className="mb-2 mt-5 font-heading text-[18px] font-medium tracking-tight text-foreground"
-        >
+        <h2 key={`h1-${blockIndex++}`} className={h2Class}>
           {line.slice(2)}
         </h2>,
       );
@@ -204,10 +218,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
       flushParagraph(`p-${blockIndex++}`);
       flushTable(`t-${blockIndex++}`);
       elements.push(
-        <h3
-          key={`h-${blockIndex++}`}
-          className="mb-2 mt-4 font-heading text-[15px] font-medium tracking-tight text-foreground"
-        >
+        <h3 key={`h-${blockIndex++}`} className={h3Class}>
           {line.slice(3)}
         </h3>,
       );
@@ -257,7 +268,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     if (line.match(/^- /)) {
       flushParagraph(`p-${blockIndex++}`);
       elements.push(
-        <li key={`li-${blockIndex++}`} className="ml-4 list-disc text-[13px] text-muted">
+        <li key={`li-${blockIndex++}`} className={liClass}>
           {renderInline(line.slice(2))}
         </li>,
       );

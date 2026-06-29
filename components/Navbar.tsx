@@ -15,6 +15,7 @@ const navLinks = [
   { href: "/components", label: "Components" },
   { href: "/chatbot", label: "AI Assistant" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export function Navbar() {

@@ -29,16 +29,15 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
       className="hover-glow relative overflow-hidden rounded-default border border-border bg-surface shadow-soft"
     >
       <div className="grid lg:grid-cols-2">
-        <div className="relative min-h-[280px] lg:min-h-[360px]">
+        <div className="relative min-h-[280px] bg-gradient-to-b from-muted/10 to-muted/30 lg:min-h-[360px]">
           <Image
             src={project.image}
             alt={project.title}
             fill
-            className="object-cover"
+            className="object-contain p-6"
             sizes="(max-width: 1024px) 100vw, 600px"
             priority
           />
-          <div className="absolute inset-0 bg-foreground/10" />
           <BlueprintGrid size={24} opacity={0.2} />
           <TechLabel
             coord="FEAT-01"

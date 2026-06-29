@@ -16,9 +16,10 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { BlueprintGrid, TechLabel } from "@/components/visuals/LabDecor";
+import { CATALOG_STATS } from "@/lib/content/catalog-stats";
 import type { ComponentFilterChip, ComponentItem, ComponentSort } from "@/lib/components-catalog";
 import {
-  catalogCategories,
+  getCatalogCategories,
   components,
   filterComponents,
   getFeaturedComponent,
@@ -27,8 +28,8 @@ import {
 } from "@/lib/components-catalog";
 
 const heroStats = [
-  { value: "250+", label: "Components" },
-  { value: "20", label: "Categories" },
+  { value: String(CATALOG_STATS.componentCount), label: "Components" },
+  { value: String(new Set(components.map((c) => c.category)).size), label: "Categories" },
   { value: "Beginner", label: "Friendly" },
   { value: "External", label: "Purchase Links" },
 ];
@@ -41,6 +42,7 @@ export function ComponentsPageContent() {
 
   const featured = getFeaturedComponent();
   const recommended = getRecommendedComponents();
+  const categories = useMemo(() => getCatalogCategories(), []);
 
   const filtered = useMemo(
     () => filterComponents(components, query, activeChip, sort),
@@ -107,10 +109,14 @@ export function ComponentsPageContent() {
           {filtered.length > 0 ? (
             <motion.div
               layout
-              className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4"
+              className="grid items-stretch gap-6 sm:grid-cols-2 xl:grid-cols-4"
             >
               {filtered.map((component, index) => (
-                <ScrollReveal key={component.slug} delay={index * 0.03}>
+                <ScrollReveal
+                  key={component.slug}
+                  delay={index * 0.03}
+                  className="h-full"
+                >
                   <ComponentCard
                     component={component}
                     onViewDetails={setSelected}
@@ -138,7 +144,7 @@ export function ComponentsPageContent() {
             </SectionTitle>
           </ScrollReveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {catalogCategories.map((cat, index) => (
+            {categories.map((cat, index) => (
               <ScrollReveal key={cat.id} delay={index * 0.04}>
                 <CategoryCard
                   label={cat.label}

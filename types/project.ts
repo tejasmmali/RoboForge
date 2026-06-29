@@ -49,6 +49,7 @@ export type ProjectChatContext = {
   progressPercent?: number;
   programming?: string;
   powerSource?: string;
+  aiPromptSuggestions?: string[];
 };
 
 export type ChatMemoryContext = {

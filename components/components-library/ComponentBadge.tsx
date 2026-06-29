@@ -14,7 +14,8 @@ const variants = {
   category:
     "border-border bg-surface/80 font-heading text-[10px] uppercase tracking-wider text-muted-foreground",
   compatibility: "border-border/80 bg-background/60 text-[11px] text-muted",
-  beginner: "border-accent/20 bg-accent/5 text-accent",
+  beginner:
+    "border-accent/20 bg-accent/5 px-2 py-0.5 text-[10px] font-medium text-accent",
   availability: "border-border bg-surface/80 text-[11px] text-muted-foreground",
 };
 

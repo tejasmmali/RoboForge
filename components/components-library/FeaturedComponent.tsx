@@ -51,7 +51,7 @@ export function FeaturedComponent({
           <div className="flex flex-wrap items-center gap-2">
             <ComponentBadge variant="category">{component.categoryLabel}</ComponentBadge>
             {component.beginnerFriendly && (
-              <ComponentBadge variant="beginner">Beginner Friendly</ComponentBadge>
+              <ComponentBadge variant="beginner">Beginner</ComponentBadge>
             )}
             <AvailabilityDot status={component.availability} />
           </div>

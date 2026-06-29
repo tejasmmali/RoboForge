@@ -211,8 +211,8 @@ export function ComponentsPageContent() {
                 </h2>
                 <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-muted">
                   RoboForge does not sell components directly. Clicking
-                  &ldquo;Buy Now&rdquo; redirects to trusted retailers such as
-                  Amazon, Robu.in, or Robocraze for purchasing.
+                  &ldquo;Buy Now&rdquo; opens a product search on Robu.in or
+                  RoboCraze so you can find verified, in-stock parts.
                 </p>
                 <p className="mt-3 flex items-center gap-1.5 text-[12px] text-muted-foreground">
                   <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />

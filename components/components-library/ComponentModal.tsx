@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Bookmark,
@@ -26,6 +27,7 @@ type ComponentModalProps = {
 };
 
 export function ComponentModal({ component, onClose }: ComponentModalProps) {
+  const [mounted, setMounted] = useState(false);
   const { isSaved, toggle: toggleBookmark } = useToggleComponentBookmark({
     componentSlug: component?.slug ?? "",
     name: component?.name,
@@ -34,6 +36,10 @@ export function ComponentModal({ component, onClose }: ComponentModalProps) {
     specifications: component?.specifications.map((s) => `${s.label}: ${s.value}`).join(" · "),
     buyUrl: component?.buyUrl,
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!component) return;
@@ -50,29 +56,33 @@ export function ComponentModal({ component, onClose }: ComponentModalProps) {
     };
   }, [component, onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {component && (
-        <>
+        <div className="fixed inset-0 z-50">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
             onClick={onClose}
             aria-hidden="true"
           />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="component-modal-title"
-            initial={{ opacity: 0, y: 40, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[calc(var(--nav-height)+1rem)] z-50 mx-auto max-h-[calc(100dvh-var(--nav-height)-2rem)] max-w-3xl overflow-y-auto rounded-default border border-border bg-surface shadow-elevated md:inset-x-auto"
-          >
+          <div className="absolute inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-start justify-center p-4 pt-[calc(var(--nav-height)+1rem)]">
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="component-modal-title"
+                initial={{ opacity: 0, y: 40, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 24, scale: 0.98 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-3xl overflow-hidden rounded-default border border-border bg-surface shadow-elevated"
+              >
             <div className="relative aspect-video w-full overflow-hidden border-b border-border">
               <Image
                 src={component.image}
@@ -97,7 +107,7 @@ export function ComponentModal({ component, onClose }: ComponentModalProps) {
                   {component.categoryLabel}
                 </ComponentBadge>
                 {component.beginnerFriendly && (
-                  <ComponentBadge variant="beginner">Beginner Friendly</ComponentBadge>
+                  <ComponentBadge variant="beginner">Beginner</ComponentBadge>
                 )}
                 <AvailabilityDot status={component.availability} />
                 <span className="ml-auto flex items-center gap-1 text-[12px] text-muted">
@@ -250,9 +260,12 @@ export function ComponentModal({ component, onClose }: ComponentModalProps) {
                 </motion.a>
               </div>
             </div>
-          </motion.div>
-        </>
+              </motion.div>
+            </div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

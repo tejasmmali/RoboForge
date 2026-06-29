@@ -19,7 +19,7 @@ import {
   isUuid,
   sanitizeInput,
   titleFromMessage,
-  toGeminiMessages,
+  buildApiMessages,
 } from "@/lib/chat/helpers";
 import { buildGlobalRouteContext, getRouteMeta } from "@/lib/chat/route-context";
 import {
@@ -439,6 +439,8 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
           messages: [],
         } satisfies Conversation);
 
+      const previousConversationId = existingConv.id;
+
       if (user) {
         try {
           conversationId = await persistConversation(conversationId, existingConv);
@@ -447,11 +449,21 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      const matchesConversation = (conv: Conversation) =>
+        conv.id === conversationId ||
+        conv.id === previousConversationId ||
+        conv.id === existingConv.id;
+
+      const resolveStoredMessages = () =>
+        conversations.find((c) => c.id === conversationId)?.messages ??
+        conversations.find((c) => c.id === existingConv.id)?.messages ??
+        existingConv.messages;
+
       let messagesForApi: ChatMessage[] = [];
       const convSnapshot = { ...existingConv, id: conversationId };
 
       if (opts.regenerate && convSnapshot.messages.length > 0) {
-        messagesForApi = [...convSnapshot.messages];
+        messagesForApi = [...resolveStoredMessages()];
         while (
           messagesForApi.length > 0 &&
           messagesForApi[messagesForApi.length - 1]?.role === "assistant"
@@ -460,8 +472,8 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
         }
         setConversations((prev) =>
           prev.map((conv) =>
-            conv.id === conversationId
-              ? { ...conv, messages: messagesForApi }
+            matchesConversation(conv)
+              ? { ...conv, id: conversationId, messages: messagesForApi }
               : conv,
           ),
         );
@@ -474,13 +486,15 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
           images: opts.images,
         };
 
+        messagesForApi = [...resolveStoredMessages(), userMessage];
+
         setConversations((prev) =>
           prev.map((conv) => {
-            if (conv.id !== conversationId) return conv;
+            if (!matchesConversation(conv)) return conv;
             const isFirst = conv.messages.length === 0;
-            messagesForApi = [...conv.messages, userMessage];
             return {
               ...conv,
+              id: conversationId,
               title: isFirst ? titleFromMessage(trimmed) : conv.title,
               preview: trimmed,
               updatedAt: userMessage.createdAt,
@@ -511,8 +525,12 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
 
       setConversations((prev) =>
         prev.map((conv) =>
-          conv.id === conversationId
-            ? { ...conv, messages: [...conv.messages, assistantPlaceholder] }
+          matchesConversation(conv)
+            ? {
+                ...conv,
+                id: conversationId,
+                messages: [...messagesForApi, assistantPlaceholder],
+              }
             : conv,
         ),
       );
@@ -521,7 +539,7 @@ export function GlobalChatProvider({ children }: { children: ReactNode }) {
       setError(null);
       abortRef.current = new AbortController();
 
-      const apiMessages = toGeminiMessages(messagesForApi);
+      const apiMessages = buildApiMessages(messagesForApi, trimmed);
 
       const { text, error: streamError } = await streamChatMessage(
         {

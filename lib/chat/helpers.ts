@@ -20,11 +20,30 @@ export function titleFromMessage(content: string) {
 export function toGeminiMessages(messages: ChatMessage[]): GeminiMessage[] {
   return messages
     .filter((m) => m.role === "user" || m.role === "assistant")
-    .filter((m) => !m.isError && m.content.trim())
+    .filter((m) => !m.isError && !m.isStreaming && m.content.trim())
     .map((message) => ({
       role: message.role === "assistant" ? "model" : "user",
-      parts: [{ text: message.content }],
+      parts: [{ text: message.content.trim() }],
     }));
+}
+
+/** Build a valid API payload even when local state is briefly out of sync. */
+export function buildApiMessages(
+  messages: ChatMessage[],
+  fallbackUserText?: string,
+): GeminiMessage[] {
+  let converted = toGeminiMessages(messages);
+
+  while (converted.length > 0 && converted[converted.length - 1]?.role === "model") {
+    converted = converted.slice(0, -1);
+  }
+
+  const fallback = fallbackUserText?.trim();
+  if (converted.length === 0 && fallback) {
+    converted = [{ role: "user", parts: [{ text: fallback }] }];
+  }
+
+  return converted;
 }
 
 export function sanitizeInput(input: string) {

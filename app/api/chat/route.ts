@@ -200,11 +200,13 @@ export async function POST(request: Request) {
     const parsed = requestSchema.safeParse(json);
 
     if (!parsed.success) {
+      console.error("[chat] invalid request payload", parsed.error.flatten());
       return NextResponse.json(
         {
           error: {
             code: "unknown",
-            message: "Invalid request. Check your message format.",
+            message:
+              "Could not send your message. Please try again or start a new chat.",
           },
         },
         { status: 400 },

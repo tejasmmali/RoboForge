@@ -46,22 +46,6 @@ lib/
   utils.ts            # Shared helpers (cn, etc.)
 ```
 
-## Design System
-
-- Warm white background (`#FAFAF8`)
-- IBM Plex Mono (headings) + Inter (body)
-- 20px border radius, 1px borders
-- Subtle paper texture overlay
-- Blue aura glow on interactive hover states
-
-## Scripts
-
-| Command       | Description              |
-|---------------|--------------------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build       |
-| `npm run start` | Start production server |
-| `npm run lint`  | Run ESLint             |
 
 ## Contact
 
